@@ -1,4 +1,4 @@
-@doop/service-{{FIXME}}
+@doop/search
 ==================
 
-A {{FIXME}} service for the [Doop framework](https://github.com/MomsFriendlyDevCo/Doop).
+A search service for the [Doop framework](https://github.com/MomsFriendlyDevCo/Doop).
