@@ -1,5 +1,7 @@
 <script lang="js" frontend>
-console.log('search.input.vue', 'bbb');
+import Debug from '@doop/debug';
+
+const $debug = Debug('@doop/search').enable(true);
 
 /**
 * Search widget that supports custom definable widgets that compose into a complex, tagged, search query compatible with the Doop search backend
@@ -58,6 +60,7 @@ app.component('searchInput', {
 		* Submit the search form
 		*/
 		submit() {
+			$debug('submit');
 			if (this.redirect) { // Perform router redirect + we have a non-blank query
 				this.setHelperVisibility(false);
 
@@ -86,6 +89,7 @@ app.component('searchInput', {
 		* @param {boolean|string} [state='toggle'] Either the visibility boolean or 'toggle' to switch
 		*/
 		setHelperVisibility(state = 'toggle') {
+			$debug('setHelperVisibility', state);
 			this.showHelper = state == 'toggle' ? !this.showHelper : !!state;
 
 			if (this.showHelper) {
@@ -106,6 +110,7 @@ app.component('searchInput', {
 		* @param {*} value The value to set
 		*/
 		setTagValue(path, value) {
+			$debug('setTagValue', path, value);
 			this.$setPath(this.tagValues, path, value);
 			this.encodeQuery();
 		},
@@ -116,6 +121,7 @@ app.component('searchInput', {
 		* Close the dialog if the click is detected anywhere outside the DOM element tree
 		*/
 		handleBodyClick(e) {
+			$debug('handleBodyClick', e);
 			if (!this.showHelper) return; // Helper is invisible anyway - disguard
 			if (!$(e.target).parents('.search-input-helper').toArray().length) { // Helper is not in DOM tree upwards - user clicked outside open search helper area
 				e.stopPropagation();
@@ -126,7 +132,8 @@ app.component('searchInput', {
 		/**
 		* Detect and handle routing while the search helper is open
 		*/
-		handleRoute(data) {
+		handleRoute(e) {
+			$debug('handleRoute', e);
 			if (!this.showHelper) return; // Helper is invisible anyway - disguard
 			this.setHelperVisibility(false);
 		},
@@ -137,6 +144,7 @@ app.component('searchInput', {
 		* This function mutates computedTags + tagValues to suitable defaults
 		*/
 		compileTags() {
+			$debug('compileTags');
 			var tagValues = {}; // Holder for new tagValues (default values of widgets)
 
 			this.computedTags = this.$props.tags.map((tag, tagIndex) => {
@@ -218,6 +226,7 @@ app.component('searchInput', {
 			});
 
 			_.forEach(tagValues, (v, k) => this.$set(this.tagValues, k, v)); // Assign Vue managed tagValues to the defaults we allocated above
+			$debug('computedTags', this.computedTags);
 		},
 
 
@@ -225,6 +234,7 @@ app.component('searchInput', {
 		* Compute local state into a search query (also set the search query display)
 		*/
 		encodeQuery() {
+			$debug('encodeQuery');
 			this.searchQuery =
 				(this.fuzzyQuery ? this.fuzzyQuery + ' ' : '') // Human fuzzy query
 				+ this.computedTags // Computed tag entries
@@ -266,6 +276,7 @@ app.component('searchInput', {
 					.filter(Boolean)
 					.join(' ')
 					.trim();
+			$debug('searchQuery', this.searchQuery);
 		},
 
 
@@ -275,6 +286,7 @@ app.component('searchInput', {
 		* @param {string} query String query to decode back into its component parts
 		*/
 		decodeQuery(query) {
+			$debug('decodeQuery', query);
 			var queryHash = this.$search.parseTags(query);
 			this.fuzzyQuery = queryHash.$fuzzy;
 
@@ -310,6 +322,7 @@ app.component('searchInput', {
 						break;
 				}
 			});
+			$debug('tagValues', this.tagValues);
 		},
 
 
@@ -319,6 +332,7 @@ app.component('searchInput', {
 		* @returns {Object} The computed digestSelect widget properties
 		*/
 		widgetDigestProps(tag) {
+			$debug('widgetDigestProps', tag);
 			return {
 				selected: this.tagValues[tag.tag],
 				...tag.digest, // Merge in remainder of tag.digest options
@@ -327,7 +341,9 @@ app.component('searchInput', {
 	},
 
 	created() {
+		$debug('created');
 		this.$watchAll(['$route.query', 'value'], ()=> { // React to query changes (if $props.readQuery is enabled), NOTE: Must fire after tags
+			$debug('$watchAll', this.$route.query, this.value);
 			var inputQuery; // Query to process
 			if (this.value) { // Have an input value
 				inputQuery = this.value;
@@ -351,14 +367,11 @@ app.component('searchInput', {
 		this.setHelperVisibility(false); // Clean up body click handlers
 	},
 
-	created() {
-		this.$debug.enable(false);
-	},
-
 	watch: {
 		tags: { // React to tag definition changes
 			immediate: true,
 			handler(newVal, oldVal) {
+				$debug('$watch', 'tags', newVal, oldVal);
 				if (JSON.stringify(newVal) == JSON.stringify(oldVal)) return; // Horrible kludge to detect if tag composition is identical - if so skip rebuild
 				this.compileTags();
 			},
@@ -367,6 +380,7 @@ app.component('searchInput', {
 			immediate: true,
 			deep: true,
 			handler() {
+				$debug('$watch', '$route.query', this.$route.query);
 				if (!this.readQuery) return; // Route query monitoring behaviour disabled
 				if (this.redirect && this.$route.path != this.redirect) return; // Path portion redirect does not match this page - ignore (allows `?q=search` to be reused on other pages other than global search redirect destination)
 
