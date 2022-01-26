@@ -1,4 +1,6 @@
 <script lang="js" frontend>
+console.log('search.input.vue', 'bbb');
+
 /**
 * Search widget that supports custom definable widgets that compose into a complex, tagged, search query compatible with the Doop search backend
 *
@@ -263,7 +265,7 @@ app.component('searchInput', {
 					.map(tag => tag.toQuery(tag)) // Call toQuery on each object expcting either a value or falsy
 					.filter(Boolean)
 					.join(' ')
-				|> _.trim
+					.trim();
 		},
 
 

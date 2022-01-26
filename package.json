@@ -16,6 +16,7 @@
   },
   "homepage": "https://github.com/MomsFriendlyDevCo/doop-search#readme",
   "dependencies": {
+    "@doop/debug": "^1.0.4",
     "lodash": "^4.17.21",
     "string-split-by": "^1.0.0"
   }
