@@ -1,3 +1,6 @@
+const debug = require('debug')('doop:search');
+debug('Init gulp search');
+
 const _ = require('lodash');
 const gulp = require('gulp');
 
@@ -14,7 +17,7 @@ const gulp = require('gulp');
 * @example Reindex only the "widgets" + " users" collections
 * REINDEX_COLLECTION=widgets,users gulp search.reindex
 */
-gulp.task('search.reindex', 'load:app.db', ()=> {
+gulp.task('search.reindex', gulp.series('load:app.db'), ()=> {
 	var reindexed = 0;
 	var filterCollections = (process.env.REINDEX_COLLECTION || '').split(/\s*,\s*/).filter(Boolean);
 	var filterIds = (process.env.REINDEX_ID || '').split(/\s*,\s*/).filter(Boolean);
