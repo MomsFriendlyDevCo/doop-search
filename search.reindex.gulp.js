@@ -34,14 +34,14 @@ gulp.task('search.reindex', gulp.series('load:app.db'), ()=> {
 			if (process.env.REINDEX_FROM) _.set(docQuery, ['_id', '$gt'], process.env.REINDEX_FROM);
 
 			return ()=> app.db[model].count(docQuery)
-				.then(totalDocs => new Promise((resolve, reject) => app.db[model].find(docQuery)
-					.forEach((next, doc) => {
+				.then(totalDocs => app.db[model].find(docQuery)
+					.cursor()
+					.eachAsync(doc => {
 						gulp.log('Reindex', gulp.colors.cyan(model), '/', gulp.colors.cyan(`#${doc._id}`), gulp.colors.gray(`${docNumber} / ${totalDocs} ~ ${Math.round(++docNumber / totalDocs * 100)}%`));
 						reindexed++;
-						doc.save(next);
+						return doc.save();
 					})
-					.exec(err => err ? reject(err) : resolve())
-				))
+				)
 		})
 	)
 		.then(()=> gulp.log('Reindex complete. Processed', gulp.colors.cyan(reindexed), 'documents'));
