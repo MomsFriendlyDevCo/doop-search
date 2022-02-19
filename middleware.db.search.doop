@@ -182,6 +182,7 @@ app.middleware.db.search = (schema, options) => {
 			...options,
 		};
 
+		app.log.debug('tags', searchSettings.acceptTags, Object.keys(searchSettings.tags));
 		var termsRE = _.chain(terms)
 			.thru(terms => stringSplit(terms, /\s+/, {
 				ignore: ['"', "'", '()'], // Preserve compound terms with speachmarks + brackets
@@ -190,6 +191,8 @@ app.middleware.db.search = (schema, options) => {
 			.map(term => /^["'\(].+["'\)]$/.test(term) ? term.slice(1, -1) : term) // Remove wrapping for combined terms
 			.filter(term => { // Remove tags
 				var tagBits = searchSettings.tagsRe.exec(term);
+				app.log.debug('tagBits', term, tagBits);
+				if (tagBits) app.log.debug('tag', tagBits.groups.tag.toLowerCase(), _.has(searchSettings.tags, tagBits.groups.tag.toLowerCase()));
 				if (tagBits && searchSettings.acceptTags && searchSettings.tags[tagBits.groups.tag.toLowerCase()]) { // Found a valid tag and we are accepting tags
 					searchSettings.mergeTags[tagBits.groups.tag.toLowerCase()] = tagBits.groups.val;
 					return false; // Remove from output list of terms
