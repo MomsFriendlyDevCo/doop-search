@@ -353,7 +353,7 @@ app.component('searchInput', {
 			if (this.value) { // Have an input value
 				inputQuery = this.value;
 			} else if (this.readQuery) {
-				if (this.redirect && !_.endsWith(this.$route.path, this.redirect)) return; // Path portion redirect does not match this page - ignore (allows `?q=search` to be reused on other pages other than global search redirect destination)
+				if (this.redirect && this.$route.path != this.redirect) return; // Path portion redirect does not match this page - ignore (allows `?q=search` to be reused on other pages other than global search redirect destination)
 				inputQuery = this.$route.query[this.readQuery];
 			} else { // Take no input
 				return;
