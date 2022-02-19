@@ -19,10 +19,10 @@
     "@doop/debug": "^1.0.4",
     "@momsfriendlydevco/gulpy": "^1.4.3",
     "debug": "^4.3.3",
+    "jquery": "^3.5.1",
     "lodash": "^4.17.21",
-    "string-split-by": "^1.0.0"
-  },
-  "workspaces": [
-    "../*"
-  ]
+    "moment": "^2.29.1",
+    "string-split-by": "^1.0.0",
+    "vue": "^2.6.14"
+  }
 }
