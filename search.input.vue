@@ -60,7 +60,7 @@ app.component('searchInput', {
 		* Submit the search form
 		*/
 		submit() {
-			$debug('submit');
+			$debug('submit', `"${this.searchQuery}"`);
 			if (this.redirect) { // Perform router redirect + we have a non-blank query
 				this.setHelperVisibility(false);
 
@@ -144,7 +144,7 @@ app.component('searchInput', {
 		* This function mutates computedTags + tagValues to suitable defaults
 		*/
 		compileTags() {
-			$debug('compileTags');
+			$debug('compileTags', this.$props.tags);
 			var tagValues = {}; // Holder for new tagValues (default values of widgets)
 
 			this.computedTags = this.$props.tags.map((tag, tagIndex) => {
@@ -234,49 +234,54 @@ app.component('searchInput', {
 		* Compute local state into a search query (also set the search query display)
 		*/
 		encodeQuery() {
-			$debug('encodeQuery');
+			$debug('encodeQuery', this.fuzzyQuery, this.computedTags);
+
+			// Precalculate tags so we know if any have been defined
+			const tags = this.computedTags // Computed tag entries
+				.map(tag => ({...tag})) // Clone tag so further mutations don't effect source
+				.map(tag => { // Add tag.value, if any
+					switch (tag.type) {
+						case 'digest': // Simple key=val setters
+							tag.value = this.tagValues[tag.tag];
+							break;
+						case 'hidden':
+							tag.value = undefined;
+							break;
+						case 'radios':
+							tag.value = this.tagValues[tag.tag] && this.tagValues[tag.tag] != tag.clearValue && this.tagValues[tag.tag];
+							break;
+						case 'date':
+							tag.rawValue = this.tagValues[tag.tag]; // Add raw full date in case its needed
+							tag.value = this.tagValues[tag.tag] && moment(this.tagValues[tag.tag]).format(tag.dateFormat);
+							break;
+						case 'dateRange':
+							tag.value = this.tagValues[tag.tag];
+							break;
+						case 'checkboxes':
+							var values = _.chain(this.tagValues[tag.tag])
+								.pickBy() // Choose only truthy values
+								.keys()
+								.value();
+
+							tag.value = values.length ? values.join(',') : false;
+							break;
+						default:
+							tag.value = false;
+							console.warn(`Cant convert unknown tag type "${tag.type}" to query string - skipping`);
+					}
+
+					return tag;
+				})
+				.map(tag => tag.toQuery(tag)) // Call toQuery on each object expcting either a value or falsy
+				.filter(Boolean)
+				.join(' ')
+				.trim();
+
 			this.searchQuery =
-				(this.fuzzyQuery ? this.fuzzyQuery + ' ' : '') // Human fuzzy query
-				+ this.computedTags // Computed tag entries
-					.map(tag => ({...tag})) // Clone tag so further mutations don't effect source
-					.map(tag => { // Add tag.value, if any
-						switch (tag.type) {
-							case 'digest': // Simple key=val setters
-								tag.value = this.tagValues[tag.tag];
-								break;
-							case 'hidden':
-								tag.value = undefined;
-								break;
-							case 'radios':
-								tag.value = this.tagValues[tag.tag] && this.tagValues[tag.tag] != tag.clearValue && this.tagValues[tag.tag];
-								break;
-							case 'date':
-								tag.rawValue = this.tagValues[tag.tag]; // Add raw full date in case its needed
-								tag.value = this.tagValues[tag.tag] && moment(this.tagValues[tag.tag]).format(tag.dateFormat);
-								break;
-							case 'dateRange':
-								tag.value = this.tagValues[tag.tag];
-								break;
-							case 'checkboxes':
-								var values = _.chain(this.tagValues[tag.tag])
-									.pickBy() // Choose only truthy values
-									.keys()
-									.value();
-
-								tag.value = values.length ? values.join(',') : false;
-								break;
-							default:
-								tag.value = false;
-								console.warn(`Cant convert unknown tag type "${tag.type}" to query string - skipping`);
-						}
-
-						return tag;
-					})
-					.map(tag => tag.toQuery(tag)) // Call toQuery on each object expcting either a value or falsy
-					.filter(Boolean)
-					.join(' ')
-					.trim();
-			$debug('searchQuery', this.searchQuery);
+				// Only append an extra space if tags have been added
+				(this.fuzzyQuery ? tags.length > 0 ? this.fuzzyQuery + ' ' : this.fuzzyQuery : '') // Human fuzzy query
+				+ tags;
+			$debug('searchQuery', `"${this.searchQuery}"`);
 		},
 
 
@@ -348,7 +353,7 @@ app.component('searchInput', {
 			if (this.value) { // Have an input value
 				inputQuery = this.value;
 			} else if (this.readQuery) {
-				if (this.redirect && this.$route.path != this.redirect) return; // Path portion redirect does not match this page - ignore (allows `?q=search` to be reused on other pages other than global search redirect destination)
+				if (this.redirect && !_.endsWith(this.$route.path, this.redirect)) return; // Path portion redirect does not match this page - ignore (allows `?q=search` to be reused on other pages other than global search redirect destination)
 				inputQuery = this.$route.query[this.readQuery];
 			} else { // Take no input
 				return;
@@ -374,21 +379,6 @@ app.component('searchInput', {
 				$debug('$watch', 'tags', newVal, oldVal);
 				if (JSON.stringify(newVal) == JSON.stringify(oldVal)) return; // Horrible kludge to detect if tag composition is identical - if so skip rebuild
 				this.compileTags();
-			},
-		},
-		'$route.query': { // React to query changes (if $props.readQuery is enabled), NOTE: Must fire after tags
-			immediate: true,
-			deep: true,
-			handler() {
-				$debug('$watch', '$route.query', this.$route.query);
-				if (!this.readQuery) return; // Route query monitoring behaviour disabled
-				if (this.redirect && this.$route.path != this.redirect) return; // Path portion redirect does not match this page - ignore (allows `?q=search` to be reused on other pages other than global search redirect destination)
-
-				this.searchQuery = this.$route.query[this.readQuery];
-				this.decodeQuery(this.searchQuery);
-				// FIXME: Why?
-				//this.encodeQuery();
-				//this.$emit('change', this.searchQuery);
 			},
 		},
 	},
@@ -533,7 +523,7 @@ app.component('searchInput', {
 	</form>
 </template>
 
-<style type="sass">
+<style lang="scss">
 /* Search input widget {{{ */
 /*
 .search-input .search-input-fuzzy {
