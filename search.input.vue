@@ -347,6 +347,7 @@ app.component('searchInput', {
 
 	created() {
 		$debug('created');
+		// TODO: Changes made in the main input box should be reflected in dropdown, without creating an infinite update loop
 		this.$watchAll(['$route.query', 'value'], ()=> { // React to query changes (if $props.readQuery is enabled), NOTE: Must fire after tags
 			$debug('$watchAll', this.$route.query, this.value);
 			var inputQuery; // Query to process
