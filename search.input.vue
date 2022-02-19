@@ -93,6 +93,7 @@ app.component('searchInput', {
 			this.showHelper = state == 'toggle' ? !this.showHelper : !!state;
 
 			if (this.showHelper) {
+				// TODO: Would this be a good time to update dropdowns search contents with whatever changes may have been made to main input field?
 				// Hook into global body click handler
 				this.$timeout(()=> $('body').on('click', '*', this.handleBodyClick), 250); // Let DOM settle then bind to clicking outside the area to close
 				app.vue.$on('$beforeRoute', this.handleRoute);
