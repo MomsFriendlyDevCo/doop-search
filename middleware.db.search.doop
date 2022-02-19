@@ -203,8 +203,9 @@ app.middleware.db.search = (schema, options) => {
 					return true;
 				}
 			})
+			.filter(Boolean) // Remove empty terms
 			.thru(terms => settings.wholeTerm && terms.length > 0 // Wrap terms in speachmarks if we only accept wholeTerm (and they are not already)
-				? [_.trim(terms.filter(Boolean).join(' '))]
+				? [_.trim(terms.join(' '))]
 				: terms
 			)
 			.map(term => searchSettings.searchTermsModify(term)) // Mangle terms to remove burring etc.
