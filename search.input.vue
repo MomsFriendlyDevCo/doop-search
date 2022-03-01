@@ -1,7 +1,7 @@
 <script lang="js" frontend>
 import Debug from '@doop/debug';
 
-const $debug = Debug('@doop/search').enable(true);
+const $debug = Debug('@doop/search').enable(false);
 
 /**
 * Search widget that supports custom definable widgets that compose into a complex, tagged, search query compatible with the Doop search backend
