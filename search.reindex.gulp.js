@@ -25,6 +25,7 @@ gulp.task('search.reindex', 'load:app.db', ()=> {
 	if (filterCollections.length) gulp.log('Only reindexing collections:', filterCollections.map(c => gulp.colors.cyan(c)).join(', '));
 	if (filterIds.length) gulp.log('Only reindexing IDs:', filterIds.map(id => gulp.colors.cyan(id)).join(', '));
 
+	// TODO: Ability to throttle reindexing to reduce server load
 	return Promise.allSeries(Object.keys(app.db)
 		.filter(model => _.isFunction(app.db[model].search)) // Has search attached to the model
 		.filter(model => !filterCollections.length || filterCollections.includes(model))
