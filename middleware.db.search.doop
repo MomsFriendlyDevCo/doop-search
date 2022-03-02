@@ -181,6 +181,8 @@ app.middleware.db.search = (schema, options) => {
 			..._.cloneDeep(settings),
 			...options,
 		};
+		// Ensure parameters are integers
+		['skip', 'limit', 'softSkip', 'softLimit'].forEach(k => searchSettings[k] = parseInt(searchSettings[k]));
 
 		app.log.debug('tags', searchSettings.acceptTags, Object.keys(searchSettings.tags));
 		var termsRE = _.chain(terms)
