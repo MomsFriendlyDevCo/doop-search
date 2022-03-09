@@ -202,7 +202,7 @@ app.middleware.db.search = (schema, options) => {
 					// Do nothing
 					return false;
 				} else if (tagBits && searchSettings.acceptTags && !searchSettings.tags[tagBits.groups.tag.toLowerCase()]) { // Found a tag but its invalid
-					app.log.warn('Invalid tag passed in search query', app.log.colors.cyan.bold(tagBits.groups.tag) + ':' + app.log.colors.cyan(tagBits.groups.val), '- tag ignored');
+					app.log.warn.as('middleware/search', 'Invalid tag passed in search query', app.log.colors.cyan.bold(tagBits.groups.tag) + ':' + app.log.colors.cyan(tagBits.groups.val), '- tag ignored');
 					return false; // Remove from output list of terms
 				} else {
 					return true;
@@ -217,7 +217,8 @@ app.middleware.db.search = (schema, options) => {
 			.map(term => new RegExp(RegExp.escape(term), 'i')) // Encode each term as a RegExp
 			.value();
 
-		app.log(
+		app.log.as(
+			'middleware/search',
 			`Performing ${!searchSettings.count ? 'search' : 'search-count'} on`,
 			'collection=', app.log.colors.cyan(schema.id),
 			'raw query=', app.log.colors.cyan(`"${terms}"`),
@@ -246,7 +247,7 @@ app.middleware.db.search = (schema, options) => {
 
 			// Include mongo tag filters if there are any {{{
 			_.forEach(searchSettings.mergeTags, (val, tag) => {
-				if (!searchSettings.tags[tag]) return app.log.warn('No handler for tag', app.log.colors.cyan.bold(tag) + ':' + app.log.colors.cyan(val), '- skipping query filter');
+				if (!searchSettings.tags[tag]) return app.log.warn.as('middleware/search', 'No handler for tag', app.log.colors.cyan.bold(tag) + ':' + app.log.colors.cyan(val), '- skipping query filter');
 				if (_.isFunction(searchSettings.tags[tag])) {
 					searchSettings.tags[tag].call(query, query, val);
 				} else if (_.isFunction(searchSettings.tags[tag].mongo)) {
@@ -299,7 +300,7 @@ app.middleware.db.search = (schema, options) => {
 								.value();
 							return (!filters.length || Promise.all(filters).then(f => f.every(r => r))); // No filters or all values are truthy
 						}).then(docs => {
-							app.log((searchSettings.count ? 'Search (count)' : 'Search') + ' complete in', app.log.colors.cyan(Date.now() - searchStart + 'ms'));
+							app.log.as('middleware/search', (searchSettings.count ? 'Search (count)' : 'Search') + ' complete in', app.log.colors.cyan(Date.now() - searchStart + 'ms'));
 							if (searchSettings.count) return resolve(docs.length); // We dont need to do any document mangling for count operations
 
 							Promise.all(docs.map(doc => // Remap each found doc...
@@ -316,7 +317,7 @@ app.middleware.db.search = (schema, options) => {
 							.then(docs => searchSettings.softSort ? _.orderBy(docs, searchSettings.softSort.replace(/^-/, ''), searchSettings.softSort.indexOf('-') === 0 ? 'desc':'asc' ) : docs)
 							.then(docs => (searchSettings.softSkip || searchSettings.softLimit) ? docs.slice(searchSettings.softSkip, searchSettings.softSkip + searchSettings.softLimit) : docs)
 							.then(docs => {
-								app.log('Search including filtering complete in', app.log.colors.cyan(Date.now() - searchStart + 'ms'));
+								app.log.as('middleware/search', 'Search including filtering complete in', app.log.colors.cyan(Date.now() - searchStart + 'ms'));
 								return resolve(docs);
 							})
 							.catch(e => reject(e));
@@ -329,7 +330,7 @@ app.middleware.db.search = (schema, options) => {
 
 	// TODO: Inject universal search engine expose if enabled {{{
 	if (app.config.search?.exposeEngine) {
-		app.log('Exposing search engine as', app.log.colors.cyan(app.config.publicUrl));
+		app.log.as('middleware/search', 'Exposing search engine as', app.log.colors.cyan(app.config.publicUrl));
 		app.config.layout.headInject.push(
 			'<script type="application/ld+json">'
 			+ JSON.stringify({
