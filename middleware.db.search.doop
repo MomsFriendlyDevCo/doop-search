@@ -119,6 +119,12 @@ app.middleware.db.search = (schema, options) => {
 	schema.index(`${settings.path}.value`);
 	// }}}
 
+	// Perform sanity checks if not in production mode {{{
+	if (!app.config.isProduction) {
+		settings.fields.forEach(f => f.path && (f.name || f.handler) && app.log.warn.as("middleware/search", `Use of both 'path' and 'name' / 'handler' is ambiguous for search field path "${f.path}"`));
+	}
+	// }}}
+
 	// Apply create / save / update hooks to documents to calculate the token storage {{{
 	var hookFactory = function(path) {
 		return function(next) {
