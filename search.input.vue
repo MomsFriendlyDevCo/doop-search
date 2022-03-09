@@ -33,17 +33,24 @@ const $debug = Debug('@doop/search').enable(true);
 */
 app.component('searchInput', {
 	data() { return {
-		searchQuery: '',
-		fuzzyQuery: '',
+		searchQuery: '', // Complete query
+		fuzzyQuery: '', // Keyword query 
+		tagsQuery: '', // Tags query
+		tagsQueryHash: {}, // Tag queries by key
 		searchHasFocus: false,
 		showHelper: false, // Whether the helper area is visible, use setHelperVisibility() to change
-		tagValues: {}, // Lookup values for each tag
-		computedTags: [], // Cleaned up version of $props.tags via compileTags()
 	}},
 	computed: {
 		hasContent() {
 			return !!this.searchQuery;
 		},
+		/*
+		tagsQuery() {
+			return this.tagsQueryHash.reduce((acc, curr) => {
+				return acc += ' ' + curr;
+			});
+		},
+		*/
 	},
 	props: {
 		value: {type: String},
@@ -52,7 +59,6 @@ app.component('searchInput', {
 		redirect: {type: String},
 		redirectDecide: {type: Function},
 		redirectQuery: {type: String, default: 'q'},
-		// TODO: Could remove tags entirely and leave completely up to project level design of slot
 		tags: {type: Array},
 		parentQuery: {type: String, default: ''}
 	},
@@ -130,32 +136,50 @@ app.component('searchInput', {
 
 
 		/**
+		 * Detect and handle changes to queries within nested components
+		 */
+		handleChange(e) {
+			$debug('handleChange', 'input', e);
+			if (_.isArray(e)) {
+				e.forEach(d => this.tagsQueryHash[d.tag] = d.value);
+			} else if (_.isObject(e)) {
+				this.tagsQueryHash[e.tag] = e.value;
+			}
+			this.tagsQuery = this.$search.stringify(_.omitBy(this.tagsQueryHash, _.isUndefined));
+			$debug('handleChange', 'output',  `"${this.tagsQuery}"`, this.tagsQueryHash);
+			this.encodeQuery();
+		},
+
+
+		/**
 		* Compute local state into a search query (also set the search query display)
 		*/
 		encodeQuery() {
-			$debug('encodeQuery', this.fuzzyQuery, this.computedTags);
-
-			// TODO: Each input control must provide it's part of the query for concatination
-			// TODO: Gather up state from children from change events?
-
+			$debug('encodeQuery', 'input', this.fuzzyQuery, this.tagsQuery);
 			this.searchQuery =
 				// Only append an extra space if tags have been added
-				(this.fuzzyQuery ? tags.length > 0 ? this.fuzzyQuery + ' ' : this.fuzzyQuery : '') // Human fuzzy query
-				// TODO: From child component
-				//+ tags;
-			$debug('searchQuery', `"${this.searchQuery}"`);
+				(
+					this.fuzzyQuery
+						? this.tagsQuery.length > 0
+							? this.fuzzyQuery + ' '
+							: this.fuzzyQuery
+						: ''
+				) // Human fuzzy query
+				+ this.tagsQuery;
+			$debug('searchQuery', 'output', `"${this.searchQuery}"`);
 		},
 
 
 		/**
 		* Decode a string query into local settings
-		* This function mutates `tagValues` to match the incomming queryString + `fuzzyQuery` with human specified parts
 		* @param {string} query String query to decode back into its component parts
 		*/
 		decodeQuery(query) {
-			$debug('decodeQuery', query);
-			var queryHash = this.$search.parseTags(query);
+			$debug('decodeQuery', 'input', query);
+			const queryHash = this.$search.parseTags(query);
 			this.fuzzyQuery = queryHash.$fuzzy;
+			this.tagsQuery = this.$search.stringify(_.omit(queryHash, '$fuzzy'));
+			$debug('decodeQuery', 'output', this.fuzzyQuery, this.tagsQuery);
 		},
 	},
 
@@ -176,9 +200,6 @@ app.component('searchInput', {
 
 			this.decodeQuery(inputQuery);
 			this.encodeQuery();
-			if(this.$route.query.q)
-				this.searchQuery = this.$route.query.q;
-
 		}, {deep: true, immediate: true});
 
 	},
@@ -236,7 +257,7 @@ app.component('searchInput', {
 					</div>
 				</div>
 				<slot>
-					<search-input-tags v-if="tags" :tags="tags" />
+					<search-input-tags v-if="tags" :tags="tags" @change="handleChange" />
 				</slot>
 				<div class="form-group row d-flex justify-content-end px-2">
 					<button type="submit" class="btn btn-primary">Search</button>
