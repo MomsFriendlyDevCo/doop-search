@@ -124,7 +124,7 @@ app.component('searchInputTags', {
 		* Compute local state into a search query (also set the search query display)
 		*/
 		encodeQuery() {
-			$debug('encodeQuery', this.computedTags);
+			$debug('encodeQuery', 'input', this.computedTags);
 
 			// TODO: Each input control must provide it's part of the query for concatination
 
@@ -143,8 +143,9 @@ app.component('searchInputTags', {
 							tag.value = this.tagValues[tag.tag] && this.tagValues[tag.tag] != tag.clearValue && this.tagValues[tag.tag];
 							break;
 						case 'date':
-							tag.rawValue = this.tagValues[tag.tag]; // Add raw full date in case its needed
-							tag.value = this.tagValues[tag.tag] && moment(this.tagValues[tag.tag]).format(tag.dateFormat);
+							//tag.rawValue = this.tagValues[tag.tag]; // Add raw full date in case its needed
+							//tag.value = this.tagValues[tag.tag] && moment(this.tagValues[tag.tag]).format(tag.dateFormat);
+							tag.value = this.tagValues[tag.tag];
 							break;
 						case 'dateRange':
 							tag.value = this.tagValues[tag.tag];
@@ -164,14 +165,15 @@ app.component('searchInputTags', {
 
 					return tag;
 				})
-				.map(tag => tag.toQuery(tag)) // Call toQuery on each object expecting either a value or falsy
-				.filter(Boolean)
-				.join(' ')
-				.trim();
+				// TODO: toQuery is the responsibility of each components encodeQuery/change function
+				//.map(tag => tag.toQuery(tag)) // Call toQuery on each object expecting either a value or falsy
+				//.filter(Boolean)
+				//.join(' ')
+				//.trim();
 
 			;
-			// TODO: Report query via event?
-			$debug('encodeQuery', tags);
+			$debug('encodeQuery', 'output', tags);
+			this.$emit('change', tags);
 		},
 
 
@@ -264,12 +266,17 @@ app.component('searchInputTags', {
 				/>
 				<!-- }}} -->
 				<!-- type='date' {{{ -->
-				<v-date
+				<search-input-tag-date v-else-if="tag.type == 'date'"
+					:date-format="tag.dateFormat"
+					:value="tagValues[tag.tag]"
+					@change="setTagValue(tag.tag, $event)"
+				/>
+				<!--v-date
 					v-else-if="tag.type == 'date'"
 					:value="tagValues[tag.tag]"
 					@selected="setTagValue(tag.tag, $event)"
 					:clear-button="true"
-				/>
+				/-->
 				<!-- }}} -->
 				<!-- type='dateRange' {{{ -->
 				<div v-else-if="tag.type == 'dateRange'" class="row">

@@ -117,7 +117,7 @@ app.component('searchInput', {
 		* Close the dialog if the click is detected anywhere outside the DOM element tree
 		*/
 		handleBodyClick(e) {
-			$debug('handleBodyClick', e);
+			//$debug('handleBodyClick', e);
 			if (!this.showHelper) return; // Helper is invisible anyway - disguard
 			if (!$(e.target).parents('.search-input-helper').toArray().length) { // Helper is not in DOM tree upwards - user clicked outside open search helper area
 				e.stopPropagation();
