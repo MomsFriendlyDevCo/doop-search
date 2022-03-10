@@ -44,11 +44,17 @@ app.service('$search', function() {
 	*/
 	$search.stringify = function(obj) {
 		return _.chain(obj)
-			.map((v, k) =>
-				k == '$fuzzy' ? v
-				: /\s/.test(v) ? `"${v}"`
-				: `${k}:${v}`
-			)
+			.map((v, k) => {
+				// Fuzzy search with or without spaces
+				if (k == '$fuzzy' && /\s/.test(v)) {
+					return `"${v}"`;
+				} else if (k == '$fuzzy') {
+					return v;
+				// Individual values within a tag may also contain spaces
+				} else {
+					return `${k}:${v.split(',').map(s => (/\s/.test(s)) ? `"${s}"`:s)}`;
+				}
+			})
 			.join(' ')
 			.value();
 	};

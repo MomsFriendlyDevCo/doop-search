@@ -158,7 +158,7 @@ app.component('searchInput', {
 						: ''
 				) // Human fuzzy query
 				+ this.tagsQuery;
-			$debug('searchQuery', 'output', `"${this.searchQuery}"`, this.tagsQuery);
+			$debug('encodeQuery', 'output', `"${this.searchQuery}"`, this.tagsQuery);
 		},
 
 
