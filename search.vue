@@ -45,14 +45,17 @@ app.service('$search', function() {
 	$search.stringify = function(obj) {
 		return _.chain(obj)
 			.map((v, k) => {
+				// Only wrap in quotes if not already wrapped...
+				const hasWhitespaceWithoutQuotes = /^[^\"]+.*\s.*[^\"]$/;
 				// Fuzzy search with or without spaces
-				if (k == '$fuzzy' && /\s/.test(v)) {
+				if (k == '$fuzzy' && hasWhitespaceWithoutQuotes.test(v)) {
 					return `"${v}"`;
 				} else if (k == '$fuzzy') {
 					return v;
 				// Individual values within a tag may also contain spaces
 				} else {
-					return `${k}:${v.split(',').map(s => (/\s/.test(s)) ? `"${s}"`:s)}`;
+					return `${k}:${v.split(',')
+						.map(s => (hasWhitespaceWithoutQuotes.test(s)) ? `"${s}"`:s)}`;
 				}
 			})
 			.join(' ')

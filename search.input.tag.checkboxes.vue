@@ -43,12 +43,16 @@ app.component('searchInputTagCheckboxes', {
 		this.$watch('value', () => {
 			if (!this.value) return;
 
-			const setValues = new Set(this.value.split(/\s*,\s*/).filter(Boolean));
+			const setValues = new Set(this.value
+				.replace(/\"/g, '') // Remove quotes to match options
+				.split(/\s*,\s*/)
+				.filter(Boolean)
+			);
 			this.rawValue = _(this.options)
 				.mapKeys(option => option.id)
 				.mapValues(option => setValues.has(option.id))
 				.value();
-			$debug('$watch', this.value, this.rawValue);
+			$debug('$watch', this.value, setValues, this.rawValue);
 		}, { immediate: true });
 	},
 });
