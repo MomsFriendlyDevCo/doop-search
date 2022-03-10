@@ -75,7 +75,7 @@ app.component('searchInputTagCheckboxes', {
 </template>
 
 <style lang="scss">
-.search-input-tag-date {
+.search-input-tag-checkboxes {
 
 }
 </style>

@@ -172,27 +172,13 @@ app.component('searchInputTags', {
 					:value="tagValues[tag.tag]"
 					@change="setTagValue(tag.tag, $event)"
 				/>
-				<!--
-				<div v-else-if="tag.type == 'checkboxes'">
-					<div v-for="option in tag.options" :key="option.id" class="form-check mr-3">
-						<input
-							class="form-check-input"
-							type="checkbox"
-							:id="`${tag.tag}-${option.id}`"
-							:checked="!!tagValues[tag.tag][option.id]"
-							@change="setTagValue([tag.tag, option.id], $event.target.checked)"
-						/>
-						<label
-							class="form-check-label"
-							:for="`${tag.tag}-${option.id}`"
-						>
-							{{option.title}}
-						</label>
-					</div>
-				</div>
-				-->
 				<!-- }}} -->
 				<!-- type='radios' {{{ -->
+				<search-input-tag-radios v-else-if="tag.type == 'radios'"
+					:options="tag.options"
+					:value="tagValues[tag.tag]"
+					@change="setTagValue(tag.tag, $event)"
+				/>
 				<!--
 				<div v-else-if="tag.type == 'radios'">
 					<div v-for="option in tag.options" :key="option.id" class="form-check mr-3">
