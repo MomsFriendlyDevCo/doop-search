@@ -1,7 +1,7 @@
 <script lang="js" frontend>
 import Debug from '@doop/debug';
 
-const $debug = Debug('@doop/search').enable(true);
+const $debug = Debug('@doop/search:searchInput').enable(true);
 
 /**
 * Search widget that supports custom definable widgets that compose into a complex, tagged, search query compatible with the Doop search backend
@@ -145,7 +145,9 @@ app.component('searchInput', {
 		*/
 		encodeQuery() {
 			$debug('encodeQuery', 'input', this.fuzzyQuery, this.tagValues);
-			this.tagsQuery = this.$search.stringify(_.omitBy(this.tagValues, _.isUndefined));
+
+			const tagValues = _.omitBy(this.tagValues, _.isUndefined);
+			this.tagsQuery = this.$search.stringify(tagValues);
 			this.searchQuery =
 				// Only append an extra space if tags have been added
 				(
@@ -156,7 +158,7 @@ app.component('searchInput', {
 						: ''
 				) // Human fuzzy query
 				+ this.tagsQuery;
-			$debug('searchQuery', 'output', `"${this.searchQuery}"`);
+			$debug('searchQuery', 'output', `"${this.searchQuery}"`, this.tagsQuery);
 		},
 
 
@@ -175,7 +177,6 @@ app.component('searchInput', {
 	},
 
 	created() {
-		$debug('created');
 		// TODO: Changes made in the main input box should be reflected in dropdown, without creating an infinite update loop
 		this.$watchAll(['$route.query', 'value'], ()=> { // React to query changes (if $props.readQuery is enabled), NOTE: Must fire after tags
 			$debug('$watchAll', this.$route.query, this.value);

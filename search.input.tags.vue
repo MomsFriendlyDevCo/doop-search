@@ -1,7 +1,7 @@
 <script lang="js" frontend>
 import Debug from '@doop/debug';
 
-const $debug = Debug('@doop/search').enable(true);
+const $debug = Debug('@doop/search:searchInputTags').enable(true);
 
 /**
 * TODO: Docs
@@ -31,28 +31,119 @@ app.component('searchInputTags', {
 		* Compute local state into a search query (also set the search query display)
 		*/
 		encodeQuery() {
-			$debug('encodeQuery', 'input', this.tags);
+			$debug('encodeQuery', 'input', this.tags, this.tagValues);
 
 			// Extract values from hashmap and mutate tags definition
-			this.$props.tags.forEach(tag => tag.value = this.tagValues[tag.tag]);
-			$debug('encodeQuery', 'output', this.tags);
-			this.$emit('change', this.tags);
+			const out = [];
+			this.$props.tags.forEach(tag => {
+				switch (tag.type) {
+					// Backwards compatible special handling of complex tag configurations {{{
+					case 'dateRange':
+						$debug('Encoding dateRange', tag, this.tagValues[tag.tag]);
+						const separator = tag.separator || '-';
+						const rawValue = this.tagValues[tag.tag];
+						if (tag.startOnlyTag && _.endsWith(rawValue, separator)) {
+							$debug('with startOnlyTag', rawValue);
+							//tag.value = tag.startOnlyTag + ':' + _.trim(rawValue, '-');
+							out.push({
+								//tag: tag.tag,
+								//value: tag.startOnlyTag + ':' + _.trim(rawValue, '-'),
+								tag: tag.startOnlyTag,
+								value: _.trim(rawValue, '-'),
+							});
+							out.push({
+								tag: tag.tag,
+								value: undefined,
+							});
+							if (tag.endOnlyTag) out.push({
+								tag: tag.endOnlyTag,
+								value: undefined,
+							});
+						} else if (tag.endOnlyTag && _.startsWith(rawValue, separator)) {
+							$debug('with endOnlyTag', rawValue);
+							//tag.value = tag.endOnlyTag + ':' + _.trim(rawValue, '-');
+							out.push({
+								//tag: tag.tag,
+								//value: tag.endOnlyTag + ':' + _.trim(rawValue, '-'),
+								tag: tag.endOnlyTag,
+								value: _.trim(rawValue, '-'),
+							});
+							out.push({
+								tag: tag.tag,
+								value: undefined,
+							});
+							if (tag.startOnlyTag) out.push({
+								tag: tag.startOnlyTag,
+								value: undefined,
+							});
+						} else {
+							$debug('with rawValue', rawValue);
+							//tag.value = rawValue;
+							out.push({
+								tag: tag.tag,
+								value: rawValue,
+							});
+							if (tag.startOnlyTag) out.push({
+								tag: tag.startOnlyTag,
+								value: undefined,
+							});
+							if (tag.endOnlyTag) out.push({
+								tag: tag.endOnlyTag,
+								value: undefined,
+							});
+						}
+						break;
+					// }}}
+					default:
+						//tag.value = this.tagValues[tag.tag];
+						out.push({
+							tag: tag.tag,
+							value: this.tagValues[tag.tag],
+						});
+						break;
+				}
+			});
+			// FIXME: mutate and output this.tags?
+			$debug('encodeQuery', 'output', out);
+			this.$emit('change', out);
 		},
 	},
 
 	created() {
-		$debug('created');
-
 		// Initialise from provided values or default
 		this.$props.tags.forEach(tag => {
-			if (this.values[tag.tag]) {
-				$debug('value', this.values[tag.tag]);
-				this.$set(this.tagValues, tag.tag, this.values[tag.tag]);
-			} else if (tag.default) {
-				$debug('default', tag.default);
-				this.$set(this.tagValues, tag.tag, tag.default);
+			$debug('value', tag.tag, this.values[tag.tag]);
+			switch (tag.type) {
+				// Backwards compatible special handling of complex tag configurations {{{
+				case 'dateRange':
+					$debug('Creating dateRange', tag);
+					const separator = tag.separator || '-';
+					if (this.values[tag.tag]) {
+						$debug('from tag', this.values[tag.tag]);
+						this.$set(this.tagValues, tag.tag, this.values[tag.tag]);
+					} else if (this.values[tag.startOnlyTag] && this.values[tag.endOnlyTag]) {	
+						$debug('from both', this.values[tag.startOnlyTag], this.values[tag.endOnlyTag]);
+						this.$set(this.tagValues, tag.tag, this.values[tag.startOnlyTag] + separator + this.values[tag.endOnlyTag]);
+					} else if (this.values[tag.startOnlyTag]) {
+						$debug('from startOnlyTag', this.values[tag.startOnlyTag]);
+						this.$set(this.tagValues, tag.tag, this.values[tag.startOnlyTag] + separator);
+					} else if (this.values[tag.endOnlyTag]) {
+						$debug('from endOnlyTag', this.values[tag.endOnlyTag]);
+						this.$set(this.tagValues, tag.tag, separator + this.values[tag.endOnlyTag]);
+					}
+					break;
+				// }}}
+				default:
+					if (this.values[tag.tag]) {
+						this.$set(this.tagValues, tag.tag, this.values[tag.tag]);
+					} else if (tag.default) {
+						$debug('default', tag.default);
+						this.$set(this.tagValues, tag.tag, tag.default);
+					}
+					break;
 			}
 		});
+		$debug('Initialised', this.tagValues);
 	},
 });
 </script>
@@ -75,35 +166,16 @@ app.component('searchInputTags', {
 					:value="tagValues[tag.tag]"
 					@change="setTagValue(tag.tag, $event)"
 				/>
-				<!--
-				-->
-				<!--v-date
-					v-else-if="tag.type == 'date'"
-					:value="tagValues[tag.tag]"
-					@selected="setTagValue(tag.tag, $event)"
-					:clear-button="true"
-				/-->
 				<!-- }}} -->
 				<!-- type='dateRange' {{{ -->
-				<div v-else-if="tag.type == 'dateRange'" class="row">
-					<div class="col-5">
-						<v-date
-							:value="tagValues[tag.tag][0]"
-							@selected="setTagValue([tag.tag, 0], $event)"
-							:clear-button="true"
-						/>
-					</div>
-					<div class="col-2 text-center">to</div>
-					<div class="col-5">
-						<v-date
-							:value="tagValues[tag.tag][1]"
-							@selected="setTagValue([tag.tag, 1], $event)"
-							:clear-button="true"
-						/>
-					</div>
-				</div>
+				<search-input-tag-date-range v-else-if="tag.type == 'dateRange'"
+					:date-format="tag.dateFormat"
+					:value="tagValues[tag.tag]"
+					@change="setTagValue(tag.tag, $event)"
+				/>
 				<!-- }}} -->
 				<!-- type='checkboxes' {{{ -->
+				<!--
 				<div v-else-if="tag.type == 'checkboxes'">
 					<div v-for="option in tag.options" :key="option.id" class="form-check mr-3">
 						<input
@@ -121,8 +193,10 @@ app.component('searchInputTags', {
 						</label>
 					</div>
 				</div>
+				-->
 				<!-- }}} -->
 				<!-- type='radios' {{{ -->
+				<!--
 				<div v-else-if="tag.type == 'radios'">
 					<div v-for="option in tag.options" :key="option.id" class="form-check mr-3">
 						<input
@@ -141,6 +215,7 @@ app.component('searchInputTags', {
 						</label>
 					</div>
 				</div>
+				-->
 				<!-- }}} -->
 				<!-- type unknown {{{ -->
 				<div v-else class="alert alert-danger">

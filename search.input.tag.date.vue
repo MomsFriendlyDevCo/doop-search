@@ -1,7 +1,7 @@
 <script lang="js" frontend>
 import Debug from '@doop/debug';
 
-const $debug = Debug('@doop/search').enable(true);
+const $debug = Debug('@doop/search:searchInputTagDate').enable(true);
 
 /**
 * TODO: Docs
@@ -26,13 +26,17 @@ app.component('searchInputTagDate', {
 		* Compute local state into a search query (also set the search query display)
 		*/
 		encodeQuery() {
-			$debug('encodeQuery', 'input', this.rawValue);
+			$debug('encodeQuery', this.rawValue, this.dateFormat);
 			this.$emit('change', moment(this.rawValue).format(this.dateFormat));
 		},
 	},
 
 	created() {
 		this.$debug().enable(true);
+
+		this.$watch('value', () => {
+			if (this.value) this.rawValue = this.value;
+		}, { immediate: true });
 	},
 });
 </script>
@@ -40,7 +44,7 @@ app.component('searchInputTagDate', {
 <template>
 	<div class="search-input-tag-date">
 		<v-date
-			:value="this.value"
+			:value="this.rawValue"
 			@selected="handleChange"
 			:clear-button="true"
 		/>

@@ -26,7 +26,7 @@ app.component('searchInputTagDigest', {
 		* Compute local state into a search query (also set the search query display)
 		*/
 		encodeQuery() {
-			$debug('encodeQuery', 'input', this.rawValue);
+			$debug('encodeQuery', this.rawValue);
 			this.$emit('change', this.rawValue);
 		},
 
@@ -56,7 +56,9 @@ app.component('searchInputTagDigest', {
 	created() {
 		this.$debug().enable(true);
 
-		if (this.value) this.rawValue = this.value;
+		this.$watch('value', () => {
+			if (this.value) this.rawValue = this.value;
+		}, { immediate: true });
 	},
 });
 </script>
