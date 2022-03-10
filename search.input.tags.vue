@@ -167,6 +167,11 @@ app.component('searchInputTags', {
 				/>
 				<!-- }}} -->
 				<!-- type='checkboxes' {{{ -->
+				<search-input-tag-checkboxes v-else-if="tag.type == 'checkboxes'"
+					:options="tag.options"
+					:value="tagValues[tag.tag]"
+					@change="setTagValue(tag.tag, $event)"
+				/>
 				<!--
 				<div v-else-if="tag.type == 'checkboxes'">
 					<div v-for="option in tag.options" :key="option.id" class="form-check mr-3">

@@ -21,7 +21,7 @@ app.component('searchInputTagDateRange', {
 	methods: {
 		handleChange(path, e) {
 			$debug('handleChange', path, e);
-			this.$set(this.rawValue, path, e);
+			this.$setPath(this.rawValue, path, e);
 			this.encodeQuery();
 		},
 
