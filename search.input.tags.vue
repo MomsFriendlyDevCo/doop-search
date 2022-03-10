@@ -33,7 +33,6 @@ app.component('searchInputTags', {
 		encodeQuery() {
 			$debug('encodeQuery', 'input', this.tags, this.tagValues);
 
-			// Extract values from hashmap and mutate tags definition
 			const out = [];
 			this.$props.tags.forEach(tag => {
 				switch (tag.type) {
@@ -44,10 +43,7 @@ app.component('searchInputTags', {
 						const rawValue = this.tagValues[tag.tag];
 						if (tag.startOnlyTag && _.endsWith(rawValue, separator)) {
 							$debug('with startOnlyTag', rawValue);
-							//tag.value = tag.startOnlyTag + ':' + _.trim(rawValue, '-');
 							out.push({
-								//tag: tag.tag,
-								//value: tag.startOnlyTag + ':' + _.trim(rawValue, '-'),
 								tag: tag.startOnlyTag,
 								value: _.trim(rawValue, '-'),
 							});
@@ -61,10 +57,7 @@ app.component('searchInputTags', {
 							});
 						} else if (tag.endOnlyTag && _.startsWith(rawValue, separator)) {
 							$debug('with endOnlyTag', rawValue);
-							//tag.value = tag.endOnlyTag + ':' + _.trim(rawValue, '-');
 							out.push({
-								//tag: tag.tag,
-								//value: tag.endOnlyTag + ':' + _.trim(rawValue, '-'),
 								tag: tag.endOnlyTag,
 								value: _.trim(rawValue, '-'),
 							});
@@ -95,7 +88,6 @@ app.component('searchInputTags', {
 						break;
 					// }}}
 					default:
-						//tag.value = this.tagValues[tag.tag];
 						out.push({
 							tag: tag.tag,
 							value: this.tagValues[tag.tag],
@@ -103,7 +95,7 @@ app.component('searchInputTags', {
 						break;
 				}
 			});
-			// FIXME: mutate and output this.tags?
+
 			$debug('encodeQuery', 'output', out);
 			this.$emit('change', out);
 		},
