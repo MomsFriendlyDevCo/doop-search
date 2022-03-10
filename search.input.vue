@@ -36,7 +36,7 @@ app.component('searchInput', {
 		searchQuery: '', // Complete query
 		fuzzyQuery: '', // Keyword query 
 		tagsQuery: '', // Tags query
-		tagsQueryHash: {}, // Tag queries by key
+		tagValues: {}, // Tag queries by key
 		searchHasFocus: false,
 		showHelper: false, // Whether the helper area is visible, use setHelperVisibility() to change
 	}},
@@ -44,13 +44,6 @@ app.component('searchInput', {
 		hasContent() {
 			return !!this.searchQuery;
 		},
-		/*
-		tagsQuery() {
-			return this.tagsQueryHash.reduce((acc, curr) => {
-				return acc += ' ' + curr;
-			});
-		},
-		*/
 	},
 	props: {
 		value: {type: String},
@@ -136,17 +129,13 @@ app.component('searchInput', {
 
 
 		/**
-		 * Detect and handle changes to queries within nested components
-		 */
-		handleChange(e) {
-			$debug('handleChange', 'input', e);
-			if (_.isArray(e)) {
-				e.forEach(d => this.tagsQueryHash[d.tag] = d.value);
-			} else if (_.isObject(e)) {
-				this.tagsQueryHash[e.tag] = e.value;
-			}
-			this.tagsQuery = this.$search.stringify(_.omitBy(this.tagsQueryHash, _.isUndefined));
-			$debug('handleChange', 'output',  `"${this.tagsQuery}"`, this.tagsQueryHash);
+		* Set the value of a search tag
+		* @param {string|array} Path Path relative to tagValues to set within
+		* @param {*} value The value to set
+		*/
+		setTagValue(path, value) {
+			$debug('setTagValue', path, value);
+			this.$setPath(this.tagValues, path, value);
 			this.encodeQuery();
 		},
 
@@ -155,7 +144,8 @@ app.component('searchInput', {
 		* Compute local state into a search query (also set the search query display)
 		*/
 		encodeQuery() {
-			$debug('encodeQuery', 'input', this.fuzzyQuery, this.tagsQuery);
+			$debug('encodeQuery', 'input', this.fuzzyQuery, this.tagValues);
+			this.tagsQuery = this.$search.stringify(_.omitBy(this.tagValues, _.isUndefined));
 			this.searchQuery =
 				// Only append an extra space if tags have been added
 				(
@@ -178,8 +168,9 @@ app.component('searchInput', {
 			$debug('decodeQuery', 'input', query);
 			const queryHash = this.$search.parseTags(query);
 			this.fuzzyQuery = queryHash.$fuzzy;
-			this.tagsQuery = this.$search.stringify(_.omit(queryHash, '$fuzzy'));
-			$debug('decodeQuery', 'output', this.fuzzyQuery, this.tagsQuery);
+			this.tagValues = _.omit(queryHash, '$fuzzy');
+			this.tagsQuery = this.$search.stringify(this.tagValues);
+			$debug('decodeQuery', 'output', this.fuzzyQuery, this.tagValues, this.tagsQuery);
 		},
 	},
 
@@ -256,8 +247,8 @@ app.component('searchInput', {
 						/>
 					</div>
 				</div>
-				<slot>
-					<search-input-tags v-if="tags" :tags="tags" @change="handleChange" />
+				<slot :tags="tags" :tag-values="tagValues" :set-tag-value="setTagValue">
+					<search-input-tags v-if="tags" :tags="tags" :values="tagValues" @change="$event.forEach(tag => setTagValue(tag.tag, tag.value))" />
 				</slot>
 				<div class="form-group row d-flex justify-content-end px-2">
 					<button type="submit" class="btn btn-primary">Search</button>

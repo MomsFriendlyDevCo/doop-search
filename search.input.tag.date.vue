@@ -8,7 +8,7 @@ const $debug = Debug('@doop/search').enable(true);
 */
 app.component('searchInputTagDate', {
 	data() { return {
-		date: undefined,
+		rawValue: undefined,
 	}},
 	props: {
 		value: {type: String},
@@ -17,7 +17,7 @@ app.component('searchInputTagDate', {
 	methods: {
 		handleChange(e) {
 			$debug('handleChange', e);
-			this.date = e;
+			this.rawValue = e;
 			this.encodeQuery();
 		},
 
@@ -26,21 +26,8 @@ app.component('searchInputTagDate', {
 		* Compute local state into a search query (also set the search query display)
 		*/
 		encodeQuery() {
-			$debug('encodeQuery', 'input', this.value);
-			this.$emit('change', moment(this.date).format(this.dateFormat));
-		},
-
-
-		/**
-		* Decode a string query into local settings
-		* This function mutates `tagValues` to match the incomming queryString + `fuzzyQuery` with human specified parts
-		* @param {string} query String query to decode back into its component parts
-		*/
-		decodeQuery(query) {
-			$debug('decodeQuery', query);
-
-			this.date = this.value ? moment(this.value, this.dateFormat).toDate() : undefined;
-			$debug('date', this.date);
+			$debug('encodeQuery', 'input', this.rawValue);
+			this.$emit('change', moment(this.rawValue).format(this.dateFormat));
 		},
 	},
 
