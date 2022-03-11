@@ -235,7 +235,7 @@ app.component('searchInput', {
 					<button class="btn btn-outline-secondary" type="submit">
 						<i class="far fa-search"/>
 					</button>
-					<button class="btn btn-outline-secondary" @click.prevent="setHelperVisibility('toggle')">
+					<button class="btn btn-outline-secondary search-input-dropdown" @click.prevent="setHelperVisibility('toggle')">
 						<i class="far fa-chevron-down"/>
 					</button>
 				</div>
