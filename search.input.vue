@@ -1,7 +1,7 @@
 <script lang="js" frontend>
 import Debug from '@doop/debug';
 
-const $debug = Debug('@doop/search').enable(false);
+const $debug = Debug('@doop/search:searchInput').enable(true);
 
 /**
 * Search widget that supports custom definable widgets that compose into a complex, tagged, search query compatible with the Doop search backend
@@ -33,12 +33,12 @@ const $debug = Debug('@doop/search').enable(false);
 */
 app.component('searchInput', {
 	data() { return {
-		searchQuery: '',
-		fuzzyQuery: '',
+		searchQuery: '', // Complete query
+		fuzzyQuery: '', // Keyword query 
+		tagsQuery: '', // Tags query
+		tagValues: {}, // Tag queries by key
 		searchHasFocus: false,
 		showHelper: false, // Whether the helper area is visible, use setHelperVisibility() to change
-		tagValues: {}, // Lookup values for each tag
-		computedTags: [], // Cleaned up version of $props.tags via compileTags()
 	}},
 	computed: {
 		hasContent() {
@@ -52,7 +52,7 @@ app.component('searchInput', {
 		redirect: {type: String},
 		redirectDecide: {type: Function},
 		redirectQuery: {type: String, default: 'q'},
-		tags: {type: Array, required: true},
+		tags: {type: Array},
 		parentQuery: {type: String, default: ''}
 	},
 	methods: {
@@ -106,23 +106,11 @@ app.component('searchInput', {
 
 
 		/**
-		* Set the value of a search tag
-		* @param {string|array} Path Path relative to tagValues to set within
-		* @param {*} value The value to set
-		*/
-		setTagValue(path, value) {
-			$debug('setTagValue', path, value);
-			this.$setPath(this.tagValues, path, value);
-			this.encodeQuery();
-		},
-
-
-		/**
 		* Detect and handle top level body clicks
 		* Close the dialog if the click is detected anywhere outside the DOM element tree
 		*/
 		handleBodyClick(e) {
-			$debug('handleBodyClick', e);
+			//$debug('handleBodyClick', e);
 			if (!this.showHelper) return; // Helper is invisible anyway - disguard
 			if (!$(e.target).parents('.search-input-helper').toArray().length) { // Helper is not in DOM tree upwards - user clicked outside open search helper area
 				e.stopPropagation();
@@ -141,93 +129,14 @@ app.component('searchInput', {
 
 
 		/**
-		* Compile tag spec + populate tagValue defaults
-		* This function mutates computedTags + tagValues to suitable defaults
+		* Set the value of a search tag
+		* @param {string|array} Path Path relative to tagValues to set within
+		* @param {*} value The value to set
 		*/
-		compileTags() {
-			$debug('compileTags', this.$props.tags);
-			var tagValues = {}; // Holder for new tagValues (default values of widgets)
-
-			this.computedTags = this.$props.tags.map((tag, tagIndex) => {
-				if (!tag.tag) throw new Error(`No tag property specified for search tag index #${tagIndex}`);
-				if (!tag.title) throw new Error(`No title property specified for search tag "${tag.tag}"`);
-				if (!tag.type) throw new Error(`No type property specified for search tag "${tag.tag}"`);
-
-				switch (tag.type) {
-					case 'hidden':
-						tagValues[tag.tag] = tag.default;
-						break;
-					case 'date':
-						tagValues[tag.tag] = tag.default;
-						if (!tag.dateFormat) tag.dateFormat = 'DD/MM/YYYY';
-						break;
-					case 'dateRange':
-						tagValues[tag.tag] = [undefined, undefined];
-						if (!tag.dateFormat) tag.dateFormat = 'DD/MM/YYYY';
-						if (!tag.seperator) tag.seperator = '-';
-						if (!tag.toQuery) tag.toQuery = tag => // Special dataRange default output function
-							_.isEmpty(tag.value) ? null // Uninitalized dates
-							: !tag.value[0] && !tag.value[1] ? null // No dates
-							: tag.value[0] && tag.value[1] ? // Has both start + end
-								tag.tag + ':'
-								+ moment(tag.value[0]).format(tag.dateFormat)
-								+ tag.seperator
-								+ moment(tag.value[1]).format(tag.dateFormat)
-							: tag.value[0] && tag.startOnlyTag ? // Only has start + alternate starting tag
-								tag.startOnlyTag + ':' + moment(tag.value[0]).format(tag.dateFormat)
-							: tag.value[0] ? // Only has start
-								tag.tag + ':' + moment(tag.value[0]).format(tag.dateFormat) + tag.seperator
-							: tag.value[1] && tag.endOnlyTag ? // Only has end + alternate ending tag
-								tag.endOnlyTag + ':' + moment(tag.value[1]).format(tag.dateFormat)
-							: tag.value[1] ? // Only has end
-								tag.tag + ':' + tag.seperator + moment(tag.value[1]).format(tag.dateFormat)
-							: null; // All other cases
-						break;
-					case 'digest':
-						if (!tag.digest || !_.isPlainObject(tag.digest)) throw new Error(`No digest config specified for digest search tag "${tag.tag}"`);
-						tag.digest = { // Set suitable digest values
-							allowRemove: true,
-							class: 'col-sm-9 form-control-plaintext',
-							classValid: 'badge badge-primary',
-							classInvalid: 'badge badge-danger',
-							lazy: false,
-							...tag.digest,
-						};
-						tagValues[tag.tag] = tag.default;
-						break;
-					case 'checkboxes':
-					case 'radios':
-						if (!tag.options || !_.isArray(tag.options)) throw new Error(`No options config specified for checkboxes / radio search tag "${tag.tag}"`);
-						tag.options = tag.options.map(option => {
-							if (_.isString(option)) {
-								return {id: option, title: _.startCase(option)}; // Transform string into iterable {id, title}
-							} else if (_.isObject(option)) {
-								if (!option.id || !option.title) throw new Error(`Search tag "${tag.tag}" options must be of the form {id: String, title: String} if specifying object values`);
-								return option;
-							} else {
-								throw new Error(`Unknown option type for checkbox / radio search tag "${tag.tag}"`);
-							}
-						});
-
-						if (tag.type == 'radios') {
-							if (!tag.clearValue) tag.clearValue = tag.options[0].id; // Allocate clearValue if its a radio
-							if (!tag.default) tag.default = tag.options[0].id;
-							tagValues[tag.tag] = tag.default;
-						} else if (tag.type == 'checkboxes') {
-							tagValues[tag.tag] = _(tag.options).mapKeys(v => v.id).mapValues(v => false).value();
-						}
-						break;
-					default:
-						throw new Error(`Unknown search tag type tag "${tag.tag}"`);
-				}
-
-				if (!tag.toQuery) tag.toQuery = tag => tag.value ? `${tag.tag}:${tag.value}` : false;
-
-				return tag;
-			});
-
-			_.forEach(tagValues, (v, k) => this.$set(this.tagValues, k, v)); // Assign Vue managed tagValues to the defaults we allocated above
-			$debug('computedTags', this.computedTags);
+		setTagValue(path, value) {
+			$debug('setTagValue', path, value);
+			this.$setPath(this.tagValues, path, value);
+			this.encodeQuery();
 		},
 
 
@@ -235,119 +144,39 @@ app.component('searchInput', {
 		* Compute local state into a search query (also set the search query display)
 		*/
 		encodeQuery() {
-			$debug('encodeQuery', this.fuzzyQuery, this.computedTags);
+			$debug('encodeQuery', 'input', this.fuzzyQuery, this.tagValues);
 
-			// Precalculate tags so we know if any have been defined
-			const tags = this.computedTags // Computed tag entries
-				.map(tag => ({...tag})) // Clone tag so further mutations don't effect source
-				.map(tag => { // Add tag.value, if any
-					switch (tag.type) {
-						case 'digest': // Simple key=val setters
-							tag.value = this.tagValues[tag.tag];
-							break;
-						case 'hidden':
-							tag.value = undefined;
-							break;
-						case 'radios':
-							tag.value = this.tagValues[tag.tag] && this.tagValues[tag.tag] != tag.clearValue && this.tagValues[tag.tag];
-							break;
-						case 'date':
-							tag.rawValue = this.tagValues[tag.tag]; // Add raw full date in case its needed
-							tag.value = this.tagValues[tag.tag] && moment(this.tagValues[tag.tag]).format(tag.dateFormat);
-							break;
-						case 'dateRange':
-							tag.value = this.tagValues[tag.tag];
-							break;
-						case 'checkboxes':
-							var values = _.chain(this.tagValues[tag.tag])
-								.pickBy() // Choose only truthy values
-								.keys()
-								.value();
-
-							tag.value = values.length ? values.join(',') : false;
-							break;
-						default:
-							tag.value = false;
-							console.warn(`Cant convert unknown tag type "${tag.type}" to query string - skipping`);
-					}
-
-					return tag;
-				})
-				.map(tag => tag.toQuery(tag)) // Call toQuery on each object expcting either a value or falsy
-				.filter(Boolean)
-				.join(' ')
-				.trim();
-
+			const tagValues = _.omitBy(this.tagValues, _.isUndefined);
+			this.tagsQuery = this.$search.stringify(tagValues);
 			this.searchQuery =
 				// Only append an extra space if tags have been added
-				(this.fuzzyQuery ? tags.length > 0 ? this.fuzzyQuery + ' ' : this.fuzzyQuery : '') // Human fuzzy query
-				+ tags;
-			$debug('searchQuery', `"${this.searchQuery}"`);
+				(
+					this.fuzzyQuery
+						? this.tagsQuery.length > 0
+							? this.fuzzyQuery + ' '
+							: this.fuzzyQuery
+						: ''
+				) // Human fuzzy query
+				+ this.tagsQuery;
+			$debug('encodeQuery', 'output', `"${this.searchQuery}"`, this.tagsQuery);
 		},
 
 
 		/**
 		* Decode a string query into local settings
-		* This function mutates `tagValues` to match the incomming queryString + `fuzzyQuery` with human specified parts
 		* @param {string} query String query to decode back into its component parts
 		*/
 		decodeQuery(query) {
-			$debug('decodeQuery', query);
-			var queryHash = this.$search.parseTags(query);
+			$debug('decodeQuery', 'input', query);
+			const queryHash = this.$search.parseTags(query);
 			this.fuzzyQuery = queryHash.$fuzzy;
-
-			this.computedTags.forEach(tag => {
-				switch (tag.type) {
-					case 'hidden': // Simple key / values
-					case 'digest':
-						this.tagValues[tag.tag] = queryHash[tag.tag];
-						break;
-					case 'date':
-						this.tagValues[tag.tag] = queryHash[tag.tag] ? moment(queryHash[tag.tag], tag.dateFormat).toDate() : undefined;
-						break;
-					case 'dateRange':
-						if (_.isEmpty(queryHash[tag.tag])) {
-							this.tagValues[tag.tag] = [undefined, undefined];
-						} else {
-							var dateSplit = queryHash[tag.tag].split(/\s*-\s*/, 2);
-							this.tagValues[tag.tag] = [
-								dateSplit[0] ? moment(dateSplit[0], tag.dateFormat).toDate() : undefined,
-								dateSplit[1] ? moment(dateSplit[1], tag.dateFormat).toDate() : undefined,
-							];
-						}
-						break;
-					case 'checkboxes':
-						var setValues = new Set((queryHash[tag.tag] || '').split(/\s*,\s*/).filter(Boolean));
-						this.tagValues[tag.tag] = _(tag.options)
-							.mapKeys(option => option.id)
-							.mapValues(option => setValues.has(option.id))
-							.value()
-						break;
-					case 'radios':
-						this.tagValues[tag.tag] = queryHash[tag.tag];
-						break;
-				}
-			});
-			$debug('tagValues', this.tagValues);
-		},
-
-
-		/**
-		* Compute and return the properties of a digest component
-		* @param {Object} tag The tag being exmined
-		* @returns {Object} The computed digestSelect widget properties
-		*/
-		widgetDigestProps(tag) {
-			$debug('widgetDigestProps', tag);
-			return {
-				selected: this.tagValues[tag.tag],
-				...tag.digest, // Merge in remainder of tag.digest options
-			};
+			this.tagValues = _.omit(queryHash, '$fuzzy');
+			this.tagsQuery = this.$search.stringify(this.tagValues);
+			$debug('decodeQuery', 'output', this.fuzzyQuery, this.tagValues, this.tagsQuery);
 		},
 	},
 
 	created() {
-		$debug('created');
 		// TODO: Changes made in the main input box should be reflected in dropdown, without creating an infinite update loop
 		this.$watchAll(['$route.query', 'value'], ()=> { // React to query changes (if $props.readQuery is enabled), NOTE: Must fire after tags
 			$debug('$watchAll', this.$route.query, this.value);
@@ -363,26 +192,12 @@ app.component('searchInput', {
 
 			this.decodeQuery(inputQuery);
 			this.encodeQuery();
-			if(this.$route.query.q)
-				this.searchQuery = this.$route.query.q;
-
 		}, {deep: true, immediate: true});
 
 	},
 
 	beforeDestroy() {
 		this.setHelperVisibility(false); // Clean up body click handlers
-	},
-
-	watch: {
-		tags: { // React to tag definition changes
-			immediate: true,
-			handler(newVal, oldVal) {
-				$debug('$watch', 'tags', newVal, oldVal);
-				if (JSON.stringify(newVal) == JSON.stringify(oldVal)) return; // Horrible kludge to detect if tag composition is identical - if so skip rebuild
-				this.compileTags();
-			},
-		},
 	},
 });
 </script>
@@ -396,7 +211,7 @@ app.component('searchInput', {
 		class="search-input"
 		:class="{
 			'input-search-focused': searchHasFocus,
-			'open': showHelper,
+			'helper-open': showHelper,
 			'has-content': hasContent,
 		}"
 	>
@@ -433,90 +248,9 @@ app.component('searchInput', {
 						/>
 					</div>
 				</div>
-				<div v-for="tag in computedTags.filter(ct => ct.type != 'hidden')" :key="tag.tag" class="form-group row">
-					<label class="col-sm-3 col-form-label">{{tag.title}}</label>
-					<div class="col-9 mt-2">
-						<!-- type='digest' {{{ -->
-						<dynamic-component
-							v-if="tag.type == 'digest'"
-							component="digestSelect"
-							:props="widgetDigestProps(tag)"
-							:events="{change: setTagValue.bind(null, tag.tag)}"
-						/>
-						<!-- }}} -->
-						<!-- type='date' {{{ -->
-						<v-date
-							v-else-if="tag.type == 'date'"
-							:value="tagValues[tag.tag]"
-							@selected="setTagValue(tag.tag, $event)"
-							:clear-button="true"
-						/>
-						<!-- }}} -->
-						<!-- type='dateRange' {{{ -->
-						<div v-else-if="tag.type == 'dateRange'" class="row">
-							<div class="col-5">
-								<v-date
-									:value="tagValues[tag.tag][0]"
-									@selected="setTagValue([tag.tag, 0], $event)"
-									:clear-button="true"
-								/>
-							</div>
-							<div class="col-2 text-center">to</div>
-							<div class="col-5">
-								<v-date
-									:value="tagValues[tag.tag][1]"
-									@selected="setTagValue([tag.tag, 1], $event)"
-									:clear-button="true"
-								/>
-							</div>
-						</div>
-						<!-- }}} -->
-						<!-- type='checkboxes' {{{ -->
-						<div v-else-if="tag.type == 'checkboxes'">
-							<div v-for="option in tag.options" :key="option.id" class="form-check mr-3">
-								<input
-									class="form-check-input"
-									type="checkbox"
-									:id="`${tag.tag}-${option.id}`"
-									:checked="!!tagValues[tag.tag][option.id]"
-									@change="setTagValue([tag.tag, option.id], $event.target.checked)"
-								/>
-								<label
-									class="form-check-label"
-									:for="`${tag.tag}-${option.id}`"
-								>
-									{{option.title}}
-								</label>
-							</div>
-						</div>
-						<!-- }}} -->
-						<!-- type='radios' {{{ -->
-						<div v-else-if="tag.type == 'radios'">
-							<div v-for="option in tag.options" :key="option.id" class="form-check mr-3">
-								<input
-									class="form-check-input"
-									type="radio"
-									:id="`${tag.tag}-${option.id}`"
-									:name="tag.tag"
-									:checked="tagValues[tag.tag] == option.id"
-									@change="setTagValue(tag.tag, option.id)"
-								/>
-								<label
-									class="form-check-label"
-									:for="`${tag.tag}-${option.id}`"
-								>
-									{{option.title}}
-								</label>
-							</div>
-						</div>
-						<!-- }}} -->
-						<!-- type unknown {{{ -->
-						<div v-else class="alert alert-danger">
-							Unknown search tag type "{{tag.type}}"
-						</div>
-						<!-- }}} -->
-					</div>
-				</div>
+				<slot :tags="tags" :tag-values="tagValues" :set-tag-value="setTagValue">
+					<search-input-tags v-if="tags" :tags="tags" :values="tagValues" @change="$event.forEach(tag => setTagValue(tag.tag, tag.value))" />
+				</slot>
 				<div class="form-group row d-flex justify-content-end px-2">
 					<button type="submit" class="btn btn-primary">Search</button>
 				</div>
@@ -551,8 +285,8 @@ app.component('searchInput', {
 	display: inline-flex;
 }
 
-.search-input.open .search-input-verbs > a.fa-chevron-down,
-.search-input.open .search-input-verbs > button.fa-chevron-down {
+.search-input.helper-open .search-input-verbs > a.fa-chevron-down,
+.search-input.helper-open .search-input-verbs > button.fa-chevron-down {
 	background: var(--main-darker);
 	border-radius: 50%;
 	color: var(--white);
@@ -570,6 +304,7 @@ app.component('searchInput', {
 	z-index: 1000;
 	background: #FFF;
 	position: absolute;
+	left: 50px; // "container" class sets width so we must assure helper is far to the left
 	border: 1px solid var(--secondary);
 	border-bottom-left-radius: 5px;
 	border-bottom-right-radius: 5px;
@@ -616,7 +351,7 @@ app.component('searchInput', {
 	right: 0px;
 }
 
-.search-input.open .search-input-helper {
+.search-input.helper-open .search-input-helper {
 	display: block;
 }
 /* }}} */
@@ -659,12 +394,20 @@ app.component('searchInput', {
 /* }}} */
 
 /* Expand search area when search has content or helper is expanded {{{ */
-.search-input.has-content .input-group {
-	width: calc(100vw - 500px);
+%search-expanded {
+	.input-group {
+		width: calc(100vw - 500px);
+	}
 }
 
-.search-input.open .input-group {
-	width: calc(100vw - 500px);
+.search-input {
+	&.has-content {
+		@extend %search-expanded;
+	}
+
+	&.helper-open {
+		@extend %search-expanded;
+	}
 }
 /* }}} */
 </style>
