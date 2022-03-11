@@ -30,6 +30,8 @@ const $debug = Debug('@doop/search:searchInput').enable(true);
 *
 * @emits preRedirect Emitted as `(queryString)` before redirecting to new destination, if the result is `false` the redirect is aborted
 * @emits change Emitted as `(queryString)` with any newly computed search query when a search has been submitted
+*
+* @slot dropdown Search dropdown helper template
 */
 app.component('searchInput', {
 	data() { return {
@@ -248,7 +250,7 @@ app.component('searchInput', {
 						/>
 					</div>
 				</div>
-				<slot :tags="tags" :tag-values="tagValues" :set-tag-value="setTagValue">
+				<slot name="dropdown" :tags="tags" :tag-values="tagValues" :set-tag-value="setTagValue">
 					<search-input-tags v-if="tags" :tags="tags" :values="tagValues" @change="$event.forEach(tag => setTagValue(tag.tag, tag.value))" />
 				</slot>
 				<div class="form-group row d-flex justify-content-end px-2">
