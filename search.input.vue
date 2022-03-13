@@ -28,8 +28,12 @@ const $debug = Debug('@doop/search:searchInput').enable(true);
 * @param {*} [tag.default] Default value for the tag if any
 * @param {function} [tag.toQuery] Function called as `(tag)` to convert tag into a search string (a default is specified that approximates to `tag => ${tag.tag}:${tag.value}`)
 *
+* @param [boolean] [dropdownFuzzy=true] Repeat the general "fuzzy" search area as the first line in the search dropdown
+*
 * @emits preRedirect Emitted as `(queryString)` before redirecting to new destination, if the result is `false` the redirect is aborted
 * @emits change Emitted as `(queryString)` with any newly computed search query when a search has been submitted
+*
+* @slot dropdown Search dropdown helper template
 */
 app.component('searchInput', {
 	data() { return {
@@ -53,6 +57,7 @@ app.component('searchInput', {
 		redirectDecide: {type: Function},
 		redirectQuery: {type: String, default: 'q'},
 		tags: {type: Array},
+		dropdownFuzzy: {type: Boolean, default: true},
 		parentQuery: {type: String, default: ''}
 	},
 	methods: {
@@ -230,13 +235,13 @@ app.component('searchInput', {
 					<button class="btn btn-outline-secondary" type="submit">
 						<i class="far fa-search"/>
 					</button>
-					<button class="btn btn-outline-secondary" @click.prevent="setHelperVisibility('toggle')">
+					<button class="btn btn-outline-secondary search-input-dropdown" @click.prevent="setHelperVisibility('toggle')">
 						<i class="far fa-chevron-down"/>
 					</button>
 				</div>
 			</div>
 			<div class="search-input-helper form-horizontal container pt-1">
-				<div class="form-group row">
+				<div v-if="dropdownFuzzy" class="form-group row">
 					<label class="col-sm-3 col-form-label">Search</label>
 					<div class="col-sm-9">
 						<input
@@ -248,7 +253,7 @@ app.component('searchInput', {
 						/>
 					</div>
 				</div>
-				<slot :tags="tags" :tag-values="tagValues" :set-tag-value="setTagValue">
+				<slot name="dropdown" :tags="tags" :tag-values="tagValues" :set-tag-value="setTagValue">
 					<search-input-tags v-if="tags" :tags="tags" :values="tagValues" @change="$event.forEach(tag => setTagValue(tag.tag, tag.value))" />
 				</slot>
 				<div class="form-group row d-flex justify-content-end px-2">
