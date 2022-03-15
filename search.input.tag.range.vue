@@ -12,14 +12,14 @@ app.component('searchInputTagRange', {
 	}},
 	props: {
 		value: {type: String},
-		min: {type: Number, default: 1},
-		max: {type: Number, default: 5},
+		min: {type: Number, default: 0},
+		max: {type: Number, default: 100},
 		// NOTE: Currently, no browser fully supports these features.
 		// Firefox doesn't support hash marks and labels at all, for example,
 		// while Chrome supports hash marks but doesn't support labels.
 		// Version 66 (66.0.3359.181) of Chrome supports labels but the <datalist> tag has to be styled with CSS as its display property is set to none by default, hiding the labels.
 		// @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/range
-		tickmarks: {type: Array, default: [1,2,3,4,5]},
+		tickmarks: {type: Array},
 	},
 	methods: {
 		handleChange(e) {
@@ -62,7 +62,7 @@ app.component('searchInputTagRange', {
 				@change="handleChange"
 				
 			/>
-			<datalist :id="`tickmarks_${_uid}`">
+			<datalist v-if="tickmarks" :id="`tickmarks_${_uid}`">
 				<option
 					v-for="(tick, index) in tickmarks" :key="index"
 					:value="tick"

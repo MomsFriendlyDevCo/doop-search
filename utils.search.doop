@@ -25,6 +25,7 @@ app.utils.search.tagGlob = (field, value, options) => {
 		...options,
 	};
 
+	// TODO: Note implementation from client-side stringify. CSV multi-select tags must also support quoted strings.
 	var splitValue = value.split(/\s*,\s*/);
 
 	if (settings.range && splitValue.some(v => /-/.test(v))) { // Some values have ranges
