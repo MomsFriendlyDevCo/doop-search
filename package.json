@@ -24,6 +24,8 @@
     "moment": "^2.29.1",
     "multirange": "^2.0.0",
     "string-split-by": "^1.0.0",
-    "vue": "^2.6.14"
+    "vue": "^2.6.14",
+    "vue-input-facade": "^2.0.0",
+    "vuejs-datepicker": "^1.6.2"
   }
 }
