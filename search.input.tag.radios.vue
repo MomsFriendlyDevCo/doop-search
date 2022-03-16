@@ -62,9 +62,3 @@ app.component('searchInputTagRadios', {
 		</div>
 	</div>
 </template>
-
-<style lang="scss">
-.search-input-tag-radios {
-
-}
-</style>

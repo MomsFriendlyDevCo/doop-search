@@ -1,4 +1,6 @@
 <script lang="js" frontend>
+import Datepicker from 'vuejs-datepicker';
+
 import Debug from '@doop/debug';
 
 const $debug = Debug('@doop/search:searchInputTagDate').enable(true);
@@ -7,12 +9,17 @@ const $debug = Debug('@doop/search:searchInputTagDate').enable(true);
 * TODO: Docs
 */
 app.component('searchInputTagDate', {
+	components: {
+		'date-picker': Datepicker
+	},
 	data() { return {
 		rawValue: undefined,
 	}},
 	props: {
 		value: {type: String},
 		dateFormat: {type: String, default: 'DD/MM/YYYY'},
+		disabled: {type: Boolean, default: false},
+		placeholder: {type: String},
 	},
 	methods: {
 		handleChange(e) {
@@ -43,16 +50,14 @@ app.component('searchInputTagDate', {
 
 <template>
 	<div class="search-input-tag-date">
-		<v-date
+		<date-picker
+			:bootstrap-styling="false"
+			wrapper-class="form-control"
+			:clear-button="true"
+			:disabled="disabled"
+			:placeholder="placeholder"
 			:value="this.rawValue"
 			@selected="handleChange"
-			:clear-button="true"
 		/>
 	</div>
 </template>
-
-<style lang="scss">
-.search-input-tag-date {
-
-}
-</style>

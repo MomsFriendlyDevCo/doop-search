@@ -209,9 +209,3 @@ app.component('searchInputTags', {
 		</div>
 	</div>
 </template>
-
-<style lang="scss">
-.search-input-tags {
-
-}
-</style>

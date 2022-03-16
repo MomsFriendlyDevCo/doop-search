@@ -3,6 +3,8 @@ import Debug from '@doop/debug';
 
 const $debug = Debug('@doop/search').enable(true);
 
+// TODO: Make "widgets/dynamicComponent.vue" a package and include as peerDependency
+
 /**
 * TODO: Docs
 */
@@ -72,9 +74,3 @@ app.component('searchInputTagDigest', {
 		/>
 	</div>
 </template>
-
-<style lang="scss">
-.search-input-tag-digest {
-
-}
-</style>

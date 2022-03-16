@@ -1,4 +1,6 @@
 <script lang="js" frontend>
+import Datepicker from 'vuejs-datepicker';
+
 import Debug from '@doop/debug';
 
 const $debug = Debug('@doop/search:searchInputTagDateRange').enable(true);
@@ -7,6 +9,9 @@ const $debug = Debug('@doop/search:searchInputTagDateRange').enable(true);
 * TODO: Docs
 */
 app.component('searchInputTagDateRange', {
+	components: {
+		'date-picker': Datepicker
+	},
 	data() { return {
 		rawValue: {
 			start: undefined,
@@ -16,6 +21,8 @@ app.component('searchInputTagDateRange', {
 	props: {
 		value: {type: String},
 		dateFormat: {type: String, default: 'DD/MM/YYYY'},
+		disabled: {type: Boolean, default: false},
+		placeholder: {type: String},
 		seperator: {type: String, default: '-'},
 	},
 	methods: {
@@ -80,25 +87,27 @@ app.component('searchInputTagDateRange', {
 <template>
 	<div class="search-input-tag-date-range row">
 		<div class="col-5">
-			<v-date
+			<date-picker
+				:bootstrap-styling="false"
+				wrapper-class="form-control"
+				:clear-button="true"
+				:disabled="disabled"
+				:placeholder="placeholder"
 				:value="this.rawValue.start"
 				@selected="handleChange('start', $event)"
-				:clear-button="true"
 			/>
 		</div>
 		<div class="col-2 text-center">to</div>
 		<div class="col-5">
-			<v-date
+			<date-picker
+				:bootstrap-styling="false"
+				wrapper-class="form-control"
+				:clear-button="true"
+				:disabled="disabled"
+				:placeholder="placeholder"
 				:value="this.rawValue.finish"
 				@selected="handleChange('finish', $event)"
-				:clear-button="true"
 			/>
 		</div>
 	</div>
 </template>
-
-<style lang="scss">
-.search-input-tag-date-range {
-
-}
-</style>
