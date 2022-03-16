@@ -34,7 +34,8 @@ app.component('searchInputTagDate', {
 		*/
 		encodeQuery() {
 			$debug('encodeQuery', this.rawValue, this.dateFormat);
-			this.$emit('change', moment(this.rawValue).format(this.dateFormat));
+			const date = moment(this.rawValue).format(this.dateFormat);
+			this.$emit('change', moment.isDate(date) ? date : '');
 		},
 	},
 

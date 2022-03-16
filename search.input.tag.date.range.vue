@@ -39,28 +39,22 @@ app.component('searchInputTagDateRange', {
 		encodeQuery() {
 			$debug('encodeQuery', 'input', this.rawValue);
 
+			const start = moment(this.rawValue.start).format(this.dateFormat);
+			const finish = moment(this.rawValue.finish).format(this.dateFormat);
+
 			// Special dataRange default output function
 			const out = _.isEmpty(this.rawValue) ? null // Uninitalized dates
-			: !this.rawValue.start && !this.rawValue.finish ? null // No dates
-			: this.rawValue.start && this.rawValue.finish ? // Has both start + end
-				//this.name + ':'
-					moment(this.rawValue.start).format(this.dateFormat)
+			: !moment.isDate(start) && !moment.isDate(finish) ? null // No dates
+			: moment.isDate(start) && moment.isDate(finish) ? // Has both start + end
+					start
 					+ this.seperator
-					+ moment(this.rawValue.finish).format(this.dateFormat)
-			//: this.rawValue.start && this.startOnlyTag ? // Only has start + alternate starting tag
-			//	this.startOnlyTag + ':' + 
-			//		moment(this.rawValue.start).format(this.dateFormat)
-			: this.rawValue.start ? // Only has start
-				//this.name + ':'
-					moment(this.rawValue.start).format(this.dateFormat)
+					+ finish
+			: moment.isDate(start) ? // Only has start
+					start
 					+ this.seperator
-			//: this.rawValue.finish && this.endOnlyTag ? // Only has end + alternate ending tag
-			//	this.endOnlyTag + ':' + 
-			//		moment(this.rawValue.finish).format(this.dateFormat)
-			: this.rawValue.finish ? // Only has end
-				//this.name + ':'
+			: moment.isDate(finish) ? // Only has end
 					this.seperator
-					+ moment(this.rawValue.finish).format(this.dateFormat)
+					+ finish
 			: null; // All other cases
 			$debug('encodeQuery', 'output', out);
 
