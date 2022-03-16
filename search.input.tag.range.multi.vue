@@ -25,9 +25,9 @@ app.component('searchInputTagRangeMulti', {
 		tickmarks: {type: Array},
 	},
 	methods: {
-		handleChange(e) {
-			$debug('handleChange', e);
-			this.rawValue = e.target.value;
+		setValue(value) {
+			$debug('setValue', value);
+			this.rawValue = value;
 			this.encodeQuery();
 		},
 
@@ -43,6 +43,11 @@ app.component('searchInputTagRangeMulti', {
 
 	mounted() {
 		Multirange.init();
+
+		// Respond to changes on ghost by pulling value from original
+		const original = $(`#search-input-tag-range-multi-${this._uid}`);
+		const ghost = $(this.$el).find('input[type="range"].multirange.ghost');
+		ghost.on('change', e => this.setValue(original.val()));
 	},
 
 	created() {
@@ -66,7 +71,7 @@ app.component('searchInputTagRangeMulti', {
 				:max="max"
 				:list="`tickmarks_${_uid}`"
 				:value="this.rawValue"
-				@change="handleChange"
+				@change="setValue($event.target.value)"
 			/>
 			<datalist v-if="tickmarks" :id="`tickmarks_${_uid}`">
 				<option
