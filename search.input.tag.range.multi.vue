@@ -6,24 +6,12 @@ const $debug = Debug('@doop/search:searchInputTagRangeMulti').enable(true);
 import Multirange from 'multirange';
 //import 'multirange/multirange.css';
 
-//import rangesliderJs from 'rangeslider-js';
-//import './node_modules/rangeslider-js/dist/styles.min.css';
-
-//import './libs/wrunner/wrunner-jquery.js';
-//import './libs/wrunner/wrunner-native.js';
-//import './libs/wrunner/themes/wrunner-default-theme.css';
-
-//import './libs/range-slider/rSlider.min.js';
-//import './libs/range-slider/rSlider.js';
-//import './libs/range-slider/rSlider.min.css';
-
 /**
 * TODO: Docs
 */
 app.component('searchInputTagRangeMulti', {
 	data() { return {
 		rawValue: undefined,
-		//slider: undefined,
 	}},
 	props: {
 		value: {type: String},
@@ -55,36 +43,6 @@ app.component('searchInputTagRangeMulti', {
 
 	mounted() {
 		Multirange.init();
-
-		//rangesliderJs.create($(this.$el).find('input[type="range"]'));
-		//$(this.$el).find('input[type="range"]').wRunner({
-		//$(`#search-input-tag-range-multi-${this._uid}`).wRunner({
-
-		/*
-		//$(`#search-input-tag-range-multi-${this._uid}`).wRunner({
-		this.slider = wRunner({
-			roots: document.getElementById(`search-input-tag-range-multi-${this._uid}`),
-			step: 1,
-			type: 'range',
-			limit: {minLimit: this.min, maxLimit: this.max},
-			divisionsCount: 5,
-			//rangeValue: { minValue: 20, maxValue: 80 }
-		});
-		//});
-		*/
-		/*
-		this.slider = new rSlider({
-			target: `#search-input-tag-range-multi-${this._uid}`,
-			values: (_.isArray(this.tickmarks)) ? this.tickmarks : {min: this.min, max: this.max},
-			range: true,
-			tooltip: false,
-			scale: true,
-			labels: true,
-			// TODO: Range, split on "-"
-			//set: this.rawValue,
-		});
-		// TODO: Not correct size until after "resize"
-		*/
 	},
 
 	created() {
@@ -94,32 +52,12 @@ app.component('searchInputTagRangeMulti', {
 			if (this.value) this.rawValue = this.value.replace('-',',');
 		}, { immediate: true });
 	},
-	/*
-	beforeDestroy() {
-		this.slider.destroy();
-	},
-	*/
 });
 </script>
 
 <template>
 	<div class="search-input-tag-range-multi">
 		<div class="form-control">
-			<!--
-			wRunner
-			<input
-				:id="`search-input-tag-range-multi-${_uid}`"
-				type="range"
-			/>
-			-->
-			<!--
-			rSlider
-			<input type="text" :id="`search-input-tag-range-multi-${_uid}`" />
-			-->
-			<!--
-			Multirange
-			// FIXME: Responding only to events on the original element
-			-->
 			<input
 				:id="`search-input-tag-range-multi-${_uid}`"
 				type="range"
