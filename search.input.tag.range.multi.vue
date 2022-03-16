@@ -4,7 +4,7 @@ import Debug from '@doop/debug';
 const $debug = Debug('@doop/search:searchInputTagRangeMulti').enable(true);
 
 import Multirange from 'multirange';
-import 'multirange/multirange.css';
+//import 'multirange/multirange.css';
 
 //import rangesliderJs from 'rangeslider-js';
 //import './node_modules/rangeslider-js/dist/styles.min.css';
@@ -132,10 +132,11 @@ app.component('searchInputTagRangeMulti', {
 			/>
 			<datalist v-if="tickmarks" :id="`tickmarks_${_uid}`">
 				<option
-					v-for="(tick, index) in tickmarks" :key="index"
+					v-for="(tick, index) in tickmarks"
+					:key="index"
 					:value="tick"
-					:label="tick">
-				</option>
+					:label="tick"
+				></option>
 			</datalist>
 		</div>
 	</div>
@@ -158,70 +159,266 @@ app.component('searchInputTagRangeMulti', {
 		width: 100%;
 	}
 
+	// FIXME: Positioning of track seems off, looks right on toughengineer demo
+	// FIXME: datalist ticks vanish when removing default styles
+
+	// From https://toughengineer.github.io/demo/slider-styler/slider-styler.html {{{
+	input[type='range'].multirange {
+		height: 1em;
+		-webkit-appearance: none;
+	}
+
+	/*progress support*/
+	input[type='range'].multirange.slider-progress {
+		--range: calc(var(--max) - var(--min));
+		--ratio: calc((var(--value) - var(--min)) / var(--range));
+		--sx: calc(0.5 * 1em + var(--ratio) * (100% - 1em));
+	}
+
+	input[type='range'].multirange:focus {
+		outline: none;
+	}
+
+	/*webkit*/
+	input[type='range'].multirange::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		width: 1em;
+		height: 1em;
+		border-radius: 1em;
+		background: #007cf8;
+		border: none;
+		box-shadow: 0 0 2px black;
+		margin-top: calc(max((0.75em - 1px - 1px) * 0.5, 0px) - 1em * 0.5);
+	}
+
+	input[type='range'].multirange::-webkit-slider-runnable-track {
+		height: 0.75em;
+		border: 1px solid #b2b2b2;
+		border-radius: 0.5em;
+		background: #efefef;
+		box-shadow: none;
+	}
+
+	input[type='range'].multirange::-webkit-slider-thumb:hover {
+		background: #0061c3;
+	}
+
+	input[type='range'].multirange:hover::-webkit-slider-runnable-track {
+		background: #e5e5e5;
+		border-color: #9a9a9a;
+	}
+
+	input[type='range'].multirange::-webkit-slider-thumb:active {
+		background: #2f98f9;
+	}
+
+	input[type='range'].multirange:active::-webkit-slider-runnable-track {
+		background: #f5f5f5;
+		border-color: #c1c1c1;
+	}
+
+	input[type='range'].multirange.slider-progress::-webkit-slider-runnable-track {
+		background: linear-gradient(#007cf8, #007cf8) 0 / var(--sx) 100% no-repeat,
+			#efefef;
+	}
+
+	input[type='range'].multirange.slider-progress:hover::-webkit-slider-runnable-track {
+		background: linear-gradient(#0061c3, #0061c3) 0 / var(--sx) 100% no-repeat,
+			#e5e5e5;
+	}
+
+	input[type='range'].multirange.slider-progress:active::-webkit-slider-runnable-track {
+		background: linear-gradient(#2f98f9, #2f98f9) 0 / var(--sx) 100% no-repeat,
+			#f5f5f5;
+	}
+
+	/*mozilla*/
+	input[type='range'].multirange::-moz-range-thumb {
+		width: 1em;
+		height: 1em;
+		border-radius: 1em;
+		background: #007cf8;
+		border: none;
+		box-shadow: 0 0 2px black;
+	}
+
+	input[type='range'].multirange::-moz-range-track {
+		height: max(calc(0.75em - 1px - 1px), 0px);
+		border: 1px solid #b2b2b2;
+		border-radius: 0.5em;
+		background: #efefef;
+		box-shadow: none;
+	}
+
+	input[type='range'].multirange::-moz-range-thumb:hover {
+		background: #0061c3;
+	}
+
+	input[type='range'].multirange:hover::-moz-range-track {
+		background: #e5e5e5;
+		border-color: #9a9a9a;
+	}
+
+	input[type='range'].multirange::-moz-range-thumb:active {
+		background: #2f98f9;
+	}
+
+	input[type='range'].multirange:active::-moz-range-track {
+		background: #f5f5f5;
+		border-color: #c1c1c1;
+	}
+
+	input[type='range'].multirange.slider-progress::-moz-range-track {
+		background: linear-gradient(#007cf8, #007cf8) 0 / var(--sx) 100% no-repeat,
+			#efefef;
+	}
+
+	input[type='range'].multirange.slider-progress:hover::-moz-range-track {
+		background: linear-gradient(#0061c3, #0061c3) 0 / var(--sx) 100% no-repeat,
+			#e5e5e5;
+	}
+
+	input[type='range'].multirange.slider-progress:active::-moz-range-track {
+		background: linear-gradient(#2f98f9, #2f98f9) 0 / var(--sx) 100% no-repeat,
+			#f5f5f5;
+	}
+
+	/*ms*/
+	input[type='range'].multirange::-ms-fill-upper {
+		background: transparent;
+		border-color: transparent;
+	}
+
+	input[type='range'].multirange::-ms-fill-lower {
+		background: transparent;
+		border-color: transparent;
+	}
+
+	input[type='range'].multirange::-ms-thumb {
+		width: 1em;
+		height: 1em;
+		border-radius: 1em;
+		background: #007cf8;
+		border: none;
+		box-shadow: 0 0 2px black;
+		margin-top: 0;
+		box-sizing: border-box;
+	}
+
+	input[type='range'].multirange::-ms-track {
+		height: 0.75em;
+		border-radius: 0.5em;
+		background: #efefef;
+		border: 1px solid #b2b2b2;
+		box-shadow: none;
+		box-sizing: border-box;
+	}
+
+	input[type='range'].multirange::-ms-thumb:hover {
+		background: #0061c3;
+	}
+
+	input[type='range'].multirange:hover::-ms-track {
+		background: #e5e5e5;
+		border-color: #9a9a9a;
+	}
+
+	input[type='range'].multirange::-ms-thumb:active {
+		background: #2f98f9;
+	}
+
+	input[type='range'].multirange:active::-ms-track {
+		background: #f5f5f5;
+		border-color: #c1c1c1;
+	}
+
+	input[type='range'].multirange.slider-progress::-ms-fill-lower {
+		height: max(calc(0.75em - 1px - 1px), 0px);
+		border-radius: 0.5em 0 0 0.5em;
+		margin: -1px 0 -1px -1px;
+		background: #007cf8;
+		border: 1px solid #b2b2b2;
+		border-right-width: 0;
+	}
+
+	input[type='range'].multirange.slider-progress:hover::-ms-fill-lower {
+		background: #0061c3;
+		border-color: #9a9a9a;
+	}
+
+	input[type='range'].multirange.slider-progress:active::-ms-fill-lower {
+		background: #2f98f9;
+		border-color: #c1c1c1;
+	}
+
+	// }}}
+
+	// Remove everything from original {{{
 	/*
-	input[type="range"].multirange.ghost {
-		//--track-default: rgb(157, 150, 142);
+	input[type='range'].multirange.original,
+	input[type='range'].multirange.ghost::-webkit-slider-runnable-track
+	input[type='range'].multirange.original::-webkit-slider-thumb {
+		-webkit-appearance: none;
+	}
+	*/
+	// }}}
+
+	// From multirange.css {{{
+	input[type='range'].multirange {
+		//padding: 0;
+		//margin: 0;
+		//display: inline-block;
+		//vertical-align: top;
+	}
+
+	input[type='range'].multirange.original {
+		position: absolute;
+	}
+
+	input[type='range'].multirange.original::-webkit-slider-thumb {
+		position: relative;
+		z-index: 2;
+	}
+
+	input[type='range'].multirange.original::-moz-range-thumb {
+		transform: scale(1); /* FF doesn't apply position it seems */
+		z-index: 1;
+	}
+
+	input[type='range'].multirange::-moz-range-track {
+		border-color: transparent; /* needed to switch FF to "styleable" control */
+	}
+
+	input[type='range'].multirange.ghost {
 		--track-default: transparent;
-		--track-background: linear-gradient(to right,
-				var(--track-default) var(--low), var(--range-color) 0,
-				var(--range-color) var(--high), transparent 0
-			) no-repeat 0 45% / 100% 40%;
-	}
-	*/
-
-	// FIXME: Strip all styles from original and ghost, create another control behind them purely as a backdrop?
-
-	/*
-	input[type="range"].multirange.ghost::-webkit-slider-thumb {
-		-webkit-appearance: none;
-		background-color: #000;
-	}
-	*/
-
-	/*
-	input[type="range"].multirange.ghost::-webkit-slider-runnable-track {
-		-webkit-appearance: none;
-		height: 10px;
-		color: #13bba4;
-		margin-top: -1px;
-	}
-	*/
-
-	/*
-	input[type="range"].multirange.ghost,
-	input[type="range"].multirange.ghost::-webkit-slider-runnable-track {
-		-webkit-appearance: none;
-	}
-
-	input[type="range"].multirange.ghost::-webkit-slider-runnable-track {
-		border: 0px none rgb(157, 150, 142);
-		outline: rgb(157, 150, 142) none 0px;
-		height: 22px;
-	}
-	*/
-
-	/*
-	input[type="range"].multirange.ghost::-moz-range-track {
-		appearance: none;
-	}
-	*/
-
-	/*
-	input[type="range"].multirange.ghost::-webkit-slider-runnable-track {
+		--track-background: linear-gradient(
+				to right,
+				var(--track-default) var(--low),
+				var(--range-color) 0,
+				var(--range-color) var(--high),
+				transparent 0
+			)
+			no-repeat 0 45% / 100% 40%;
+		--range-color: hsl(190, 80%, 40%);
+		position: relative;
 		background: var(--track-background);
 	}
 
-	input[type="range"].multirange.ghost::-moz-range-track {
+	input[type='range'].multirange.ghost::-webkit-slider-runnable-track {
 		background: var(--track-background);
 	}
-	*/
+
+	input[type='range'].multirange.ghost::-moz-range-track {
+		background: var(--track-background);
+	}
+	// }}}
 
 	// Fix width overflow when original is absolute positioned {{{
-	input[type=range].multirange.original {
+	input[type='range'].multirange.original {
 		position: relative;
 	}
 
-	input[type=range].multirange.ghost {
+	input[type='range'].multirange.ghost {
 		position: relative;
 		top: -24px;
 	}
