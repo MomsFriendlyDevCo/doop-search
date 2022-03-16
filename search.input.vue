@@ -151,7 +151,8 @@ app.component('searchInput', {
 		encodeQuery() {
 			$debug('encodeQuery', 'input', this.fuzzyQuery, this.tagValues);
 
-			const tagValues = _.omitBy(this.tagValues, _.isUndefined);
+			// Remove empty tags or undefined tags
+			const tagValues = _(this.tagValues).omitBy(_.isEmpty).omitBy(_.isUndefined).value();
 			this.tagsQuery = this.$search.stringify(tagValues);
 			this.searchQuery =
 				// Only append an extra space if tags have been added
