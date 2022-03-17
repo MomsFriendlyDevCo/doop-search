@@ -28,5 +28,8 @@
     "vue-input-facade": "^2.0.0",
     "vue-select": "^3.18.3",
     "vuejs-datepicker": "^1.6.2"
+  },
+  "peerDependencies": {
+    "@doop/dynamic-component": "^1.0.0"
   }
 }
