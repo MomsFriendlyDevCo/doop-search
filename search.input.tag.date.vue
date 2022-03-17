@@ -1,4 +1,5 @@
 <script lang="js" frontend>
+// TODO: peerDependency @doop/dates
 import Datepicker from 'vuejs-datepicker';
 
 import Debug from '@doop/debug';
