@@ -1,6 +1,6 @@
 {
   "name": "@doop/search",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "A search service for the Doop framework",
   "repository": {
     "type": "git",
