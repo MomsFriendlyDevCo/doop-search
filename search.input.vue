@@ -1,8 +1,6 @@
 <script lang="js" frontend>
 import Debug from '@doop/debug';
 
-const $debug = Debug('@doop/search:searchInput').enable(true);
-
 /**
 * Search widget that supports custom definable widgets that compose into a complex, tagged, search query compatible with the Doop search backend
 *
@@ -65,7 +63,7 @@ app.component('searchInput', {
 		* Submit the search form
 		*/
 		submit() {
-			$debug('submit', `"${this.searchQuery}"`);
+			this.$debug('submit', `"${this.searchQuery}"`);
 			if (this.redirect) { // Perform router redirect + we have a non-blank query
 				this.setHelperVisibility(false);
 
@@ -94,7 +92,7 @@ app.component('searchInput', {
 		* @param {boolean|string} [state='toggle'] Either the visibility boolean or 'toggle' to switch
 		*/
 		setHelperVisibility(state = 'toggle') {
-			$debug('setHelperVisibility', state);
+			this.$debug('setHelperVisibility', state);
 			this.showHelper = state == 'toggle' ? !this.showHelper : !!state;
 
 			if (this.showHelper) {
@@ -115,7 +113,6 @@ app.component('searchInput', {
 		* Close the dialog if the click is detected anywhere outside the DOM element tree
 		*/
 		handleBodyClick(e) {
-			//$debug('handleBodyClick', e);
 			if (!this.showHelper) return; // Helper is invisible anyway - disguard
 			if (!$(e.target).parents('.search-input-helper').toArray().length) { // Helper is not in DOM tree upwards - user clicked outside open search helper area
 				e.stopPropagation();
@@ -127,7 +124,7 @@ app.component('searchInput', {
 		* Detect and handle routing while the search helper is open
 		*/
 		handleRoute(e) {
-			$debug('handleRoute', e);
+			this.$debug('handleRoute', e);
 			if (!this.showHelper) return; // Helper is invisible anyway - disguard
 			this.setHelperVisibility(false);
 		},
@@ -139,7 +136,7 @@ app.component('searchInput', {
 		* @param {*} value The value to set
 		*/
 		setTagValue(path, value) {
-			$debug('setTagValue', path, value);
+			this.$debug('setTagValue', path, value);
 			this.$setPath(this.tagValues, path, value);
 			this.encodeQuery();
 		},
@@ -149,7 +146,7 @@ app.component('searchInput', {
 		* Compute local state into a search query (also set the search query display)
 		*/
 		encodeQuery() {
-			$debug('encodeQuery', 'input', this.fuzzyQuery, this.tagValues);
+			this.$debug('encodeQuery', 'input', this.fuzzyQuery, this.tagValues);
 
 			// Remove empty tags or undefined tags
 			const tagValues = _(this.tagValues).omitBy(_.isEmpty).omitBy(_.isUndefined).value();
@@ -164,7 +161,7 @@ app.component('searchInput', {
 						: ''
 				) // Human fuzzy query
 				+ this.tagsQuery;
-			$debug('encodeQuery', 'output', `"${this.searchQuery}"`, this.tagsQuery);
+			this.$debug('encodeQuery', 'output', `"${this.searchQuery}"`, this.tagsQuery);
 		},
 
 
@@ -173,19 +170,21 @@ app.component('searchInput', {
 		* @param {string} query String query to decode back into its component parts
 		*/
 		decodeQuery(query) {
-			$debug('decodeQuery', 'input', query);
+			this.$debug('decodeQuery', 'input', query);
 			const queryHash = this.$search.parseTags(query);
 			this.fuzzyQuery = queryHash.$fuzzy;
 			this.tagValues = _.omit(queryHash, '$fuzzy');
 			this.tagsQuery = this.$search.stringify(this.tagValues);
-			$debug('decodeQuery', 'output', this.fuzzyQuery, this.tagValues, this.tagsQuery);
+			this.$debug('decodeQuery', 'output', this.fuzzyQuery, this.tagValues, this.tagsQuery);
 		},
 	},
 
 	created() {
+		this.$debug.enable(false);
+
 		// TODO: Changes made in the main input box should be reflected in dropdown, without creating an infinite update loop
 		this.$watchAll(['$route.query', 'value'], ()=> { // React to query changes (if $props.readQuery is enabled), NOTE: Must fire after tags
-			$debug('$watchAll', this.$route.query, this.value);
+			this.$debug('$watchAll', this.$route.query, this.value);
 			var inputQuery; // Query to process
 			if (this.value) { // Have an input value
 				inputQuery = this.value;

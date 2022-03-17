@@ -41,7 +41,7 @@ app.component('searchInputTagRange', {
 	},
 
 	created() {
-		this.$debug().enable(true);
+		this.$debug.enable(false);
 
 		this.$watch('value', () => {
 			if (this.value) this.rawValue = this.value;
