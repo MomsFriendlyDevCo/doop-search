@@ -1,6 +1,6 @@
 <script lang="js" frontend>
-// TODO: peerDependency @doop/dates
-import Datepicker from 'vuejs-datepicker';
+// NOTE: Date components included with @doop/dates
+//import Datepicker from 'vuejs-datepicker';
 
 import Debug from '@doop/debug';
 
@@ -10,9 +10,9 @@ const $debug = Debug('@doop/search:searchInputTagDateRange').enable(true);
 * TODO: Docs
 */
 app.component('searchInputTagDateRange', {
-	components: {
-		'date-picker': Datepicker
-	},
+	//components: {
+	//	'date-picker': Datepicker
+	//},
 	data() { return {
 		rawValue: {
 			start: undefined,

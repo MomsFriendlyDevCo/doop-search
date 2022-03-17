@@ -1,4 +1,5 @@
 <script lang="js" frontend>
+// TODO: Create @doop/select and migrate to using peerDependencies
 import vSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
 

@@ -30,6 +30,7 @@
     "vuejs-datepicker": "^1.6.2"
   },
   "peerDependencies": {
+    "@doop/dates": "^1.0.0",
     "@doop/dynamic-component": "^1.0.0"
   }
 }
