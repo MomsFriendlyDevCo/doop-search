@@ -38,7 +38,7 @@ app.component('searchInputTagCheckboxes', {
 	},
 
 	created() {
-		this.$debug().enable(true);
+		this.$debug.enable(false);
 
 		this.$watch('value', () => {
 			if (!this.value) return;
