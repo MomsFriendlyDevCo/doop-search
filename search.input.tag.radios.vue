@@ -44,9 +44,9 @@ app.component('searchInputTagRadios', {
 
 <template>
 	<div class="search-input-tag-radios">
-		<div v-for="option in options" :key="option.id" class="form-check mr-3">
+		<div v-for="option in options" :key="option.id" class="custom-control custom-radio">
 			<input
-				class="form-check-input"
+				class="custom-control-input"
 				type="radio"
 				:id="`${_uid}-${option.id}`"
 				:name="_uid"
@@ -54,7 +54,7 @@ app.component('searchInputTagRadios', {
 				@change="setOption(option.id)"
 			/>
 			<label
-				class="form-check-label"
+				class="custom-control-label"
 				:for="`${_uid}-${option.id}`"
 			>
 				{{option.title}}

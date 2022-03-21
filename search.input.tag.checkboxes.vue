@@ -60,16 +60,16 @@ app.component('searchInputTagCheckboxes', {
 
 <template>
 	<div class="search-input-tag-checkboxes">
-		<div v-for="option in options" :key="option.id" class="form-check mr-3">
+		<div v-for="option in options" :key="option.id" class="custom-control custom-checkbox">
 			<input
-				class="form-check-input"
+				class="custom-control-input"
 				type="checkbox"
 				:id="`${_uid}-${option.id}`"
 				:checked="!!rawValue[option.id]"
 				@change="setOption(option.id, $event.target.checked)"
-			/>
+			>
 			<label
-				class="form-check-label"
+				class="custom-control-label"
 				:for="`${_uid}-${option.id}`"
 			>
 				{{option.title}}
