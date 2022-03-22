@@ -32,6 +32,7 @@ import Debug from '@doop/debug';
 * @emits change Emitted as `(queryString)` with any newly computed search query when a search has been submitted
 *
 * @slot dropdown Search dropdown helper template
+* @slot footer Default footer area to display (defaults to a simple submit button)
 */
 app.component('searchInput', {
 	data() { return {
@@ -83,6 +84,15 @@ app.component('searchInput', {
 					})
 			}
 
+			this.$emit('change', this.searchQuery);
+		},
+
+
+		/**
+		* Clear the search query
+		*/
+		clear() {
+			this.searchQuery = '';
 			this.$emit('change', this.searchQuery);
 		},
 
@@ -256,9 +266,11 @@ app.component('searchInput', {
 				<slot name="dropdown" :tags="tags" :tag-values="tagValues" :set-tag-value="setTagValue">
 					<search-input-tags v-if="tags" :tags="tags" :values="tagValues" @change="$event.forEach(tag => setTagValue(tag.tag, tag.value))" />
 				</slot>
-				<div class="form-group row d-flex justify-content-end px-2">
-					<button type="submit" class="btn btn-primary">Search</button>
-				</div>
+				<slot name="footer">
+					<div class="form-group row d-flex justify-content-end px-2">
+						<button type="submit" class="btn btn-primary">Search</button>
+					</div>
+				</slot>
 			</div>
 		</div>
 	</form>
