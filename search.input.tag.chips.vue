@@ -97,12 +97,16 @@ app.component('searchInputTagChips', {
 		this.$debug.enable(false);
 
 		this.$watch('value', () => {
+			this.$debug('$watch', 'value', this.value, this.rawValue);
 			if (!this.value) {
 				this.rawValue = [];
 				return;
 			}
 
 			this.value.split(',').forEach(v => {
+				// Check if value is already selected
+				if (this.rawValue.find(o => this.getOptionKey(o) === v)) return;
+
 				// Retrieve full value object as required
 				if (this.enumSource === 'url') {
 					this.$http.get(this.enumUrl, {
@@ -153,3 +157,9 @@ app.component('searchInputTagChips', {
 		/>
 	</div>
 </template>
+
+<style lang="scss">
+.v-select.vs--multiple {
+	height: auto;
+}
+</style>
