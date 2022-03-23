@@ -97,7 +97,10 @@ app.component('searchInputTagChips', {
 		this.$debug.enable(false);
 
 		this.$watch('value', () => {
-			if (!this.value) return;
+			if (!this.value) {
+				this.rawValue = [];
+				return;
+			}
 
 			this.value.split(',').forEach(v => {
 				// Retrieve full value object as required

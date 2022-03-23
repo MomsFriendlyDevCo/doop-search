@@ -92,7 +92,10 @@ app.component('searchInput', {
 		* Clear the search query
 		*/
 		clear() {
-			this.searchQuery = '';
+			this.$debug('clear', this.fuzzyQuery, this.tagValues);
+			this.fuzzyQuery = '';
+			this.tagValues = {};
+			this.encodeQuery();
 			this.$emit('change', this.searchQuery);
 		},
 

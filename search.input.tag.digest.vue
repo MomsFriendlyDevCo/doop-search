@@ -59,7 +59,12 @@ app.component('searchInputTagDigest', {
 		this.$debug.enable(false);
 
 		this.$watch('value', () => {
-			if (this.value) this.rawValue = this.value;
+			if (!this.value) {
+				this.rawValue = undefined;
+				return;
+			}
+
+			this.rawValue = this.value;
 		}, { immediate: true });
 	},
 });

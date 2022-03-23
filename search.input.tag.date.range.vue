@@ -68,7 +68,11 @@ app.component('searchInputTagDateRange', {
 		this.$debug.enable(false);
 
 		this.$watch('value', () => {
-			if (!this.value) return;
+			if (!this.value) {
+				this.rawValue.start = undefined;
+				this.rawValue.finish = undefined;
+				return;
+			}
 
 			const values = this.value.split(this.seperator);
 			this.rawValue.start = values[0];

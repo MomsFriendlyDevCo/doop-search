@@ -41,7 +41,10 @@ app.component('searchInputTagCheckboxes', {
 		this.$debug.enable(false);
 
 		this.$watch('value', () => {
-			if (!this.value) return;
+			if (!this.value) {
+				this.rawValue = {};
+				return;
+			}
 
 			const setValues = new Set(this.value
 				.replace(/\"/g, '') // Remove quotes to match options
