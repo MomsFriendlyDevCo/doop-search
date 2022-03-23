@@ -36,8 +36,14 @@ app.component('searchInputTagRangeMulti', {
 		* Compute local state into a search query (also set the search query display)
 		*/
 		encodeQuery() {
-			$debug('encodeQuery', this.rawValue);
-			this.$emit('change', this.rawValue.replace(',','-'));
+			$debug('encodeQuery', this.rawValue, this.min, this.max);
+			const parts = this.rawValue.split(',').map(p => parseInt(p));
+			// Default is empty string when "min,max" are selected
+			if (parts[0] === this.min && parts[1] === this.max) {
+				this.$emit('change', '');
+			} else {
+				this.$emit('change', parts.join('-'));
+			}
 		},
 	},
 
@@ -54,7 +60,12 @@ app.component('searchInputTagRangeMulti', {
 		this.$debug.enable(false);
 
 		this.$watch('value', () => {
-			if (this.value) this.rawValue = this.value.replace('-',',');
+			if (this.value) {
+				this.rawValue = this.value.replace('-',',');
+			} else {
+				// Default to "min,max"
+				this.rawValue = this.min + ',' + this.max;
+			}
 		}, { immediate: true });
 	},
 });
