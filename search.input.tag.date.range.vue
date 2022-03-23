@@ -46,15 +46,15 @@ app.component('searchInputTagDateRange', {
 
 			// Special dataRange default output function
 			const out = _.isEmpty(this.rawValue) ? null // Uninitalized dates
-			: !moment.isDate(start) && !moment.isDate(finish) ? null // No dates
-			: moment.isDate(start) && moment.isDate(finish) ? // Has both start + end
+			: !moment(start).isValid() && !moment(finish).isValid() ? null // No dates
+			: moment(start).isValid() && moment(finish).isValid() ? // Has both start + end
 					start
 					+ this.seperator
 					+ finish
-			: moment.isDate(start) ? // Only has start
+			: moment(start).isValid() ? // Only has start
 					start
 					+ this.seperator
-			: moment.isDate(finish) ? // Only has end
+			: moment(finish).isValid() ? // Only has end
 					this.seperator
 					+ finish
 			: null; // All other cases

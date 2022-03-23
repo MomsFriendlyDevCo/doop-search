@@ -5,7 +5,7 @@
 
 import Debug from '@doop/debug';
 
-const $debug = Debug('@doop/search:searchInputTagDate').enable(true);
+const $debug = Debug('@doop/search:searchInputTagDate').enable(false);
 
 /**
 * TODO: Docs
@@ -36,8 +36,9 @@ app.component('searchInputTagDate', {
 		*/
 		encodeQuery() {
 			$debug('encodeQuery', this.rawValue, this.dateFormat);
-			const date = moment(this.rawValue).format(this.dateFormat);
-			this.$emit('change', moment.isDate(date) ? date : '');
+			const date = moment(this.rawValue);
+			$debug('date', date, date.isValid())
+			this.$emit('change', date.isValid() ? date.format(this.dateFormat) : '');
 		},
 	},
 
