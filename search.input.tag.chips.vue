@@ -96,6 +96,12 @@ app.component('searchInputTagChips', {
 	created() {
 		this.$debug.enable(false);
 
+		this.$watch('enum', () => {
+			if (this.enumSource !== 'list') return;
+
+			this.enumIter = this.enum;
+		}, { immediate: true });
+
 		this.$watch('value', () => {
 			this.$debug('$watch', 'value', this.value, this.rawValue);
 			if (!this.value) {
