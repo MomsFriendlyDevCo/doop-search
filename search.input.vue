@@ -6,6 +6,7 @@ import Debug from '@doop/debug';
 *
 * @param {string} [value] Initial value to decode and display, if omitted `readQuery` is used instead
 * @param {string} [placeholder="Search..."] Placeholder text to display
+* @param {boolean} [secondClickDropdown=true] Clicking a second time on the input when its already active will toggle the dropdown
 * @param {string|boolean} [readQuery='q'] If non-falsy, try to read the query from $router.query into the current state
 *
 * @param {string} [redirect] Front end URL to redirect to on submission (rather than just emitting)
@@ -50,6 +51,7 @@ app.component('searchInput', {
 	},
 	props: {
 		value: {type: String},
+		secondClickDropdown: {type: Boolean, default: true},
 		placeholder: {type: String, default: 'Search...'},
 		readQuery: {type: [String, Boolean], default: 'q'},
 		redirect: {type: String},
@@ -190,6 +192,14 @@ app.component('searchInput', {
 			this.tagsQuery = this.$search.stringify(this.tagValues);
 			this.$debug('decodeQuery', 'output', this.fuzzyQuery, this.tagValues, this.tagsQuery);
 		},
+
+
+		/**
+		* If `secondClickDropdown` is active check if we have focus and if so open the dropdown
+		*/
+		click() {
+			if (this.searchHasFocus) return this.setHelperVisibility('toggle');
+		},
 	},
 
 	created() {
@@ -240,6 +250,7 @@ app.component('searchInput', {
 					type="search"
 					:placeholder="placeholder"
 					class="form-control search-input-fuzzy"
+					@click="click"
 					@focus="searchHasFocus = true"
 					@blur="searchHasFocus = false"
 					autocomplete="off"
