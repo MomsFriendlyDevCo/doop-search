@@ -137,7 +137,7 @@ app.component('searchInputTagChips', {
 </script>
 
 <template>
-	<div class="search-input-tag-text">
+	<div class="search-input-tag-chips">
 		<v-select
 			class="form-control"
 
