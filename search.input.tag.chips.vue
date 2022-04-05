@@ -139,6 +139,8 @@ module.exports = {
 <template>
 	<div class="search-input-tag-chips">
 		<v-select
+			class="form-control"
+
 			:placeholder="placeholder"
 			:disabled="disabled"
 			:readonly="readonly"
