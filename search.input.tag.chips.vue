@@ -1,19 +1,18 @@
 <script lang="js" frontend>
-// TODO: Create @doop/select and migrate to using peerDependencies
 import vSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
 
 import Debug from '@doop/debug';
 
-const $debug = Debug('@doop/search:searchInputTagChips').enable(true);
+const $debug = Debug('@doop/search:searchInputTagChips').enable(false);
 
 /**
 * TODO: Docs
 */
-app.component('searchInputTagChips', {
-	components: {
-		'v-select': vSelect
-	},
+module.exports = {
+	//components: {
+	//	'v-select': vSelect
+	//},
 	data() { return {
 		rawValue: [],
 		enumIter: [],
@@ -94,8 +93,6 @@ app.component('searchInputTagChips', {
 	},
 
 	created() {
-		this.$debug.enable(false);
-
 		this.$watch('enum', () => {
 			if (this.enumSource !== 'list') return;
 
@@ -103,15 +100,17 @@ app.component('searchInputTagChips', {
 		}, { immediate: true });
 
 		this.$watch('value', () => {
-			this.$debug('$watch', 'value', this.value, this.rawValue);
+			$debug('$watch', 'value', this.value, this.rawValue);
 			if (!this.value) {
 				this.rawValue = [];
 				return;
 			}
 
 			this.value.split(',').forEach(v => {
+				const value = /^["'\(].+["'\)]$/.test(v) ? v.slice(1, -1) : v; // Remove wrapping for combined terms
+
 				// Check if value is already selected
-				if (this.rawValue.find(o => this.getOptionKey(o) === v)) return;
+				if (this.rawValue.find(o => this.getOptionKey(o) === value)) return;
 
 				// Retrieve full value object as required
 				if (this.enumSource === 'url') {
@@ -121,26 +120,25 @@ app.component('searchInputTagChips', {
 						},
 					})
 					.then(res => this.rawValue.push(
-						res.data.find(o => this.getOptionKey(o) === v)
+						res.data.find(o => this.getOptionKey(o) === value)
 					));
 
 				// Utilise pre-defined list of value objects
 				} else {
 					this.rawValue.push(
-						this.enumIter.find(o => this.getOptionKey(o) === v)
+						this.enumIter.find(o => this.getOptionKey(o) === value)
 					);
 				}
-			})
+			});
+			$debug('rawValue', this.rawValue);
 		}, { immediate: true });
 	},
-});
+};
 </script>
 
 <template>
 	<div class="search-input-tag-chips">
 		<v-select
-			class="form-control"
-
 			:placeholder="placeholder"
 			:disabled="disabled"
 			:readonly="readonly"

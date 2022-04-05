@@ -1,5 +1,4 @@
 <script lang="js" frontend>
-// TODO: We could use date-select which is more pretty.
 // NOTE: Date components included with @doop/dates
 //import Datepicker from 'vuejs-datepicker';
 
