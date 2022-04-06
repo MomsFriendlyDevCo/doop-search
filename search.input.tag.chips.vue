@@ -9,7 +9,7 @@ const $debug = Debug('@doop/search:searchInputTagChips').enable(false);
 /**
 * TODO: Docs
 */
-module.exports = {
+app.component('searchInputTagChips', {
 	components: {
 		'v-select': vSelect
 	},
@@ -133,7 +133,7 @@ module.exports = {
 			$debug('rawValue', this.rawValue);
 		}, { immediate: true });
 	},
-};
+});
 </script>
 
 <template>
