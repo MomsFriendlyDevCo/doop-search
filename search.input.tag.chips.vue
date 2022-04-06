@@ -10,9 +10,9 @@ const $debug = Debug('@doop/search:searchInputTagChips').enable(false);
 * TODO: Docs
 */
 module.exports = {
-	//components: {
-	//	'v-select': vSelect
-	//},
+	components: {
+		'v-select': vSelect
+	},
 	data() { return {
 		rawValue: [],
 		enumIter: [],
