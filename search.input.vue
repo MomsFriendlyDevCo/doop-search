@@ -31,6 +31,7 @@ import Debug from '@doop/debug';
 *
 * @emits preRedirect Emitted as `(queryString)` before redirecting to new destination, if the result is `false` the redirect is aborted
 * @emits change Emitted as `(queryString)` with any newly computed search query when a search has been submitted
+* @emits input Emitted as `(queryString)` with any user input - differs from `change` is the query may be partially complete
 *
 * @slot dropdown Search dropdown helper template
 * @slot footer Default footer area to display (defaults to a simple submit button)
@@ -202,6 +203,13 @@ app.component('searchInput', {
 		},
 	},
 
+	watch: {
+		searchQuery() {
+			console.log('SQ input', this.searchQuery);
+			this.$emit('input', this.searchQuery);
+		},
+	},
+
 	created() {
 		this.$debug.enable(false);
 
@@ -221,7 +229,6 @@ app.component('searchInput', {
 			this.decodeQuery(inputQuery);
 			this.encodeQuery();
 		}, {deep: true, immediate: true});
-
 	},
 
 	beforeDestroy() {
