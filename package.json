@@ -16,7 +16,7 @@
   },
   "homepage": "https://github.com/MomsFriendlyDevCo/doop-search#readme",
   "dependencies": {
-    "@doop/debug": "^1.0.4",
+    "@doop/debug": "^1.0.5",
     "@momsfriendlydevco/gulpy": "^1.4.3",
     "debug": "^4.3.3",
     "jquery": "^3.5.1",
